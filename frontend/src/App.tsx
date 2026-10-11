@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Header } from './components/Header';
 import { Sidebar, SessionItem } from './components/Sidebar';
 import { ChatView } from './components/ChatView';
-import { ArtifactViewerSkeleton } from './components/ArtifactViewerSkeleton';
-import { Message } from './types/chat';
+import { ArtifactViewer } from './components/ArtifactViewer';
+import { Artifact, Message } from './types/chat';
 import {
   sessionsApi,
   healthApi,
@@ -13,6 +13,8 @@ import {
 
 export const App: React.FC = () => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [activeArtifact, setActiveArtifact] = useState<Artifact | null>(null);
+  const [sessionArtifacts, setSessionArtifacts] = useState<Artifact[]>([]);
   const [systemReady, setSystemReady] = useState<boolean | null>(null);
   const [dbConnected, setDbConnected] = useState(false);
   const [activeProvider, setActiveProvider] = useState('local_ollama');
@@ -32,13 +34,31 @@ export const App: React.FC = () => {
     setError(null);
     try {
       const data = await sessionsApi.get(sessionId);
+      const arts = (data.artifacts || []).map((a: any) => ({
+        ...a,
+        id: String(a.id),
+        session_id: String(a.session_id ?? sessionId),
+      })) as Artifact[];
+      setSessionArtifacts(arts);
+
       setMessages(
-        (data.messages as Message[]).map((m) => ({
-          ...m,
-          id: String(m.id),
-          session_id: String(m.session_id ?? sessionId),
-        })),
+        (data.messages as Message[]).map((m) => {
+          const matchingArt = arts.find((a) => String(a.id) === String(m.artifact_id));
+          return {
+            ...m,
+            id: String(m.id),
+            session_id: String(m.session_id ?? sessionId),
+            artifact: matchingArt || (m.artifact as Artifact | undefined),
+          };
+        }),
       );
+
+      if (arts.length > 0) {
+        setActiveArtifact(arts[0]);
+      } else {
+        setActiveArtifact(null);
+        setIsViewerOpen(false);
+      }
     } catch (err: any) {
       setError(err.message || 'Error loading session history');
     }
@@ -92,6 +112,9 @@ export const App: React.FC = () => {
       setSessions((prev) => [{ ...newSession, id } as SessionItem, ...prev]);
       setActiveSessionId(id);
       setMessages([]);
+      setActiveArtifact(null);
+      setSessionArtifacts([]);
+      setIsViewerOpen(false);
       setError(null);
     } catch (err: any) {
       console.error('Failed to create session:', err);
@@ -115,6 +138,9 @@ export const App: React.FC = () => {
         } else {
           setActiveSessionId(null);
           setMessages([]);
+          setActiveArtifact(null);
+          setSessionArtifacts([]);
+          setIsViewerOpen(false);
         }
       }
     } catch (err: any) {
@@ -180,6 +206,7 @@ export const App: React.FC = () => {
 
       let accContent = '';
       let accCitations: any[] = [];
+      let generatedArtifact: Artifact | null = null;
 
       const controller = streamChat(targetSessionId, promptText, {
         onStatus: (data) => {
@@ -199,15 +226,49 @@ export const App: React.FC = () => {
             prev ? { ...prev, content: accContent } : null,
           );
         },
+        onArtifact: (artData) => {
+          const art: Artifact = {
+            id: String(artData.id),
+            session_id: String(artData.session_id),
+            title: artData.title,
+            artifact_type: artData.artifact_type,
+            content: artData.content,
+            created_at: artData.created_at,
+          };
+          generatedArtifact = art;
+          setActiveArtifact(art);
+          setSessionArtifacts((prev) => [art, ...prev]);
+          setIsViewerOpen(true);
+          setStreamingMessage((prev) =>
+            prev ? { ...prev, artifact: art } : null,
+          );
+        },
         onDone: (data) => {
           const finalContent = data.final_content || accContent;
           const finalCitations = data.citations || accCitations;
+          const artToAttach = data.artifact
+            ? {
+                id: String(data.artifact.id),
+                session_id: String(data.artifact.session_id),
+                title: data.artifact.title,
+                artifact_type: data.artifact.artifact_type,
+                content: data.artifact.content,
+                created_at: data.artifact.created_at,
+              }
+            : generatedArtifact;
+
+          if (artToAttach) {
+            setActiveArtifact(artToAttach);
+            setIsViewerOpen(true);
+          }
+
           const completed: Message = {
             id: `assistant-${Date.now()}`,
             session_id: targetSessionId,
             role: 'assistant',
             content: finalContent,
             citations: finalCitations,
+            artifact: artToAttach || undefined,
             isStreaming: false,
             created_at: new Date().toISOString(),
           };
@@ -314,7 +375,15 @@ export const App: React.FC = () => {
     >
       <Header
         isViewerOpen={isViewerOpen}
-        onToggleViewer={() => setIsViewerOpen((v) => !v)}
+        onToggleViewer={() => {
+          setIsViewerOpen((prev) => {
+            const next = !prev;
+            if (next && !activeArtifact && sessionArtifacts.length > 0) {
+              setActiveArtifact(sessionArtifacts[0]);
+            }
+            return next;
+          });
+        }}
         systemReady={systemReady}
         activeProvider={activeProvider}
         onProviderChanged={(p) => setActiveProvider(p)}
@@ -347,13 +416,19 @@ export const App: React.FC = () => {
           lastPrompt={lastPrompt}
           onSendMessage={handleSendMessage}
           onStopStreaming={handleStopStreaming}
+          onOpenArtifact={(art) => {
+            setActiveArtifact(art);
+            setIsViewerOpen(true);
+          }}
           onClearError={() => setError(null)}
           onRetry={handleRetry}
         />
 
-        {isViewerOpen && (
-          <ArtifactViewerSkeleton onClose={() => setIsViewerOpen(false)} />
-        )}
+        <ArtifactViewer
+          artifact={activeArtifact}
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+        />
       </div>
     </div>
   );

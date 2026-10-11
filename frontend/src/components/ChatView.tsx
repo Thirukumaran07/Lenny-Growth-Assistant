@@ -10,7 +10,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { Citation, Message } from '../types/chat';
+import { Artifact, Citation, Message } from '../types/chat';
 import { ChatMessageItem } from './ChatMessageItem';
 import { ChatComposer } from './ChatComposer';
 import { CitationDrawer } from './CitationDrawer';
@@ -24,6 +24,7 @@ interface ChatViewProps {
   lastPrompt?: string;
   onSendMessage: (prompt: string) => void;
   onStopStreaming: () => void;
+  onOpenArtifact?: (artifact: Artifact) => void;
   onClearError?: () => void;
   onRetry?: () => void;
 }
@@ -102,6 +103,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   lastPrompt,
   onSendMessage,
   onStopStreaming,
+  onOpenArtifact,
   onClearError,
   onRetry,
 }) => {
@@ -277,6 +279,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 key={msg.id}
                 message={msg}
                 onOpenCitation={handleOpenCitation}
+                onOpenArtifact={onOpenArtifact}
                 onRetry={
                   msg.role === 'assistant' && msg.statusStage === 'error' && onRetry
                     ? onRetry
@@ -290,6 +293,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
               <ChatMessageItem
                 message={streamingMessage}
                 onOpenCitation={handleOpenCitation}
+                onOpenArtifact={onOpenArtifact}
               />
             )}
 

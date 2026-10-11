@@ -10,12 +10,23 @@ export interface Citation {
   similarity: number;
 }
 
+export interface Artifact {
+  id: string;
+  session_id: string;
+  title: string;
+  artifact_type: 'html' | 'markdown';
+  content: string;
+  created_at: string;
+}
+
 export interface Message {
   id: string;
   session_id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   citations?: Citation[];
+  artifact_id?: string;
+  artifact?: Artifact;
   metadata?: Record<string, any>;
   created_at: string;
   isStreaming?: boolean;
@@ -54,6 +65,6 @@ export interface ModelsStatusResponse {
 }
 
 export interface SSEEvent {
-  event: 'status' | 'citations' | 'token' | 'done' | 'error';
+  event: 'status' | 'citations' | 'token' | 'artifact' | 'done' | 'error';
   data: any;
 }

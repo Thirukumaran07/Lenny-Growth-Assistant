@@ -12,6 +12,7 @@ from backend.app.routers.health import router as health_router
 from backend.app.routers.sessions import router as sessions_router
 from backend.app.routers.models import router as models_router
 from backend.app.routers.chat import router as chat_router
+from backend.app.routers.artifacts import router as artifacts_router
 
 logger = structlog.get_logger()
 
@@ -60,6 +61,7 @@ def create_app() -> FastAPI:
     app.include_router(sessions_router, prefix="/api")
     app.include_router(models_router, prefix="/api")
     app.include_router(chat_router, prefix="/api")
+    app.include_router(artifacts_router, prefix="/api")
     # Also expose /health and /ready directly at root for standard Docker/K8s orchestrators
     app.include_router(health_router)
 

@@ -10,6 +10,7 @@ from backend.app.agent.router import SkillRouter
 from backend.app.agent.skills.base import SkillContext, SkillType
 from backend.app.agent.skills.grounded_qa import GroundedQASkill
 from backend.app.agent.skills.ship30 import Ship30EssaySkill
+from backend.app.agent.skills.artifact_gen import ArtifactGeneratorSkill
 from backend.app.providers.base import ChatMessage, GenerationConfig
 from backend.app.providers.manager import ProviderManager
 from backend.app.repositories.message_repo import MessageRepository
@@ -26,6 +27,7 @@ class AgentRunner:
         router: SkillRouter | None = None,
         grounded_qa_skill: GroundedQASkill | None = None,
         ship30_skill: Ship30EssaySkill | None = None,
+        artifact_skill: ArtifactGeneratorSkill | None = None,
         session_repo: SessionRepository | None = None,
         message_repo: MessageRepository | None = None,
         provider_manager: ProviderManager | None = None,
@@ -33,6 +35,7 @@ class AgentRunner:
         self.router = router or SkillRouter()
         self.grounded_qa_skill = grounded_qa_skill or GroundedQASkill()
         self.ship30_skill = ship30_skill or Ship30EssaySkill()
+        self.artifact_skill = artifact_skill or ArtifactGeneratorSkill()
         self.session_repo = session_repo or SessionRepository()
         self.message_repo = message_repo or MessageRepository()
         self.provider_manager = provider_manager or ProviderManager()
@@ -76,9 +79,12 @@ class AgentRunner:
 
         final_content = ""
         citations = []
+        created_artifact_id = None
 
         if skill_type == SkillType.SHIP30_ESSAY:
             stream_gen = self.ship30_skill.execute_stream(context, db)
+        elif skill_type == SkillType.ARTIFACT_GENERATOR:
+            stream_gen = self.artifact_skill.execute_stream(context, db)
         elif skill_type == SkillType.GROUNDED_QA:
             stream_gen = self.grounded_qa_skill.execute_stream(context, db)
         else:
@@ -88,12 +94,19 @@ class AgentRunner:
         # 5. Stream events to consumer
         async for event in stream_gen:
             yield event
-            if event["event"] == "done":
+            if event["event"] == "artifact":
+                raw_art_id = event.get("data", {}).get("id")
+                if raw_art_id:
+                    try:
+                        created_artifact_id = uuid.UUID(raw_art_id)
+                    except ValueError:
+                        pass
+            elif event["event"] == "done":
                 done_data = event.get("data", {})
                 final_content = done_data.get("final_content", "")
                 citations = done_data.get("citations", [])
 
-        # 6. Persist assistant response turn with citations atomically
+        # 6. Persist assistant response turn with citations and artifact_id atomically
         if final_content:
             await self.message_repo.append(
                 db=db,
@@ -101,6 +114,7 @@ class AgentRunner:
                 role="assistant",
                 content=final_content,
                 citations=citations,
+                artifact_id=created_artifact_id,
             )
             await db.commit()
 

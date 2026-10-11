@@ -11,6 +11,7 @@ class SkillType(str, Enum):
     GROUNDED_QA = "grounded_qa"
     SHIP30_ESSAY = "ship30_essay"
     DIRECT_CHAT = "direct_chat"
+    ARTIFACT_GENERATOR = "artifact_generator"
 
 
 @dataclass

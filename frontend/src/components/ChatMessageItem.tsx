@@ -7,16 +7,20 @@ import {
   Check,
   Copy,
   ExternalLink,
+  Eye,
+  FileCode,
+  FileText,
   Loader2,
   RefreshCw,
   Sparkles,
   User,
 } from 'lucide-react';
-import { Citation, Message } from '../types/chat';
+import { Artifact, Citation, Message } from '../types/chat';
 
 interface ChatMessageItemProps {
   message: Message;
   onOpenCitation: (citation: Citation, allCitations: Citation[]) => void;
+  onOpenArtifact?: (artifact: Artifact) => void;
   onRetry?: () => void;
 }
 
@@ -78,6 +82,7 @@ const STATUS_LABELS: Record<string, string> = {
   retrieving: 'Searching Lenny podcast archives…',
   generating: 'Generating grounded response…',
   generating_direct: 'Generating response…',
+  generating_artifact: 'Synthesizing standalone artifact…',
   insufficient_evidence: 'Checking evidence threshold…',
   composing_essay: 'Composing Ship 30 for 30 essay…',
   finalizing: 'Finalizing grounded answer…',
@@ -86,6 +91,7 @@ const STATUS_LABELS: Record<string, string> = {
 export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   message,
   onOpenCitation,
+  onOpenArtifact,
   onRetry,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -489,6 +495,95 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             />
           )}
         </div>
+
+        {/* Linked Artifact Card (Phase 9) */}
+        {message.artifact && (
+          <div
+            role="region"
+            aria-label="Attached Artifact"
+            style={{
+              marginTop: '16px',
+              backgroundColor: 'var(--bg-surface)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '8px',
+              padding: '12px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+              {message.artifact.artifact_type === 'html' ? (
+                <FileCode size={20} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
+              ) : (
+                <FileText size={20} color="var(--accent-growth)" style={{ flexShrink: 0 }} />
+              )}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {message.artifact.title}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      padding: '1px 5px',
+                      borderRadius: '3px',
+                      backgroundColor:
+                        message.artifact.artifact_type === 'html'
+                          ? 'rgba(59, 130, 246, 0.15)'
+                          : 'rgba(16, 185, 129, 0.15)',
+                      color:
+                        message.artifact.artifact_type === 'html'
+                          ? 'var(--accent-primary)'
+                          : 'var(--accent-growth)',
+                    }}
+                  >
+                    {message.artifact.artifact_type === 'html' ? 'HTML/CSS' : 'Markdown'}
+                  </span>
+                </div>
+                <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  Complete standalone document generated from conversation
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => onOpenArtifact?.(message.artifact!)}
+              title="Open in Side-by-Side Artifact Viewer"
+              aria-label={`Open artifact: ${message.artifact.title}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'var(--accent-primary)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'background-color 0.15s ease',
+              }}
+            >
+              <Eye size={13} />
+              <span>Open Artifact</span>
+            </button>
+          </div>
+        )}
 
         {/* Verified Citations — rendered as pill badges */}
         {message.citations && message.citations.length > 0 && (

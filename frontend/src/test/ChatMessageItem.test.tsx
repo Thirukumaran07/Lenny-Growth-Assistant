@@ -155,4 +155,53 @@ describe('ChatMessageItem', () => {
     );
     expect(screen.getByText('Retry Request')).toBeInTheDocument();
   });
+
+  it('renders ordinary code blocks without confusing them with artifacts', () => {
+    const onOpenArtifact = vi.fn();
+    const { container } = render(
+      <ChatMessageItem
+        message={makeMsg({ content: 'Here is some python code:\n```python\nprint("hello")\n```' })}
+        onOpenCitation={vi.fn()}
+        onOpenArtifact={onOpenArtifact}
+      />,
+    );
+
+    // Ordinary code block is present in markdown
+    expect(container.querySelector('pre')).toBeInTheDocument();
+    // Does NOT render the artifact card or "Open Artifact" button
+    expect(screen.queryByLabelText(/Attached Artifact/i)).toBeNull();
+    expect(screen.queryByText(/Open Artifact/i)).toBeNull();
+    expect(onOpenArtifact).not.toHaveBeenCalled();
+  });
+
+  it('renders dedicated Artifact Card and triggers onOpenArtifact when clicked', () => {
+    const onOpenArtifact = vi.fn();
+    const mockArtifact = {
+      id: 'art-123',
+      session_id: 'sess-001',
+      title: 'Superhuman PMF Survey Framework',
+      artifact_type: 'html' as const,
+      content: '<html><body>Framework</body></html>',
+      created_at: new Date().toISOString(),
+    };
+
+    render(
+      <ChatMessageItem
+        message={makeMsg({ artifact: mockArtifact })}
+        onOpenCitation={vi.fn()}
+        onOpenArtifact={onOpenArtifact}
+      />,
+    );
+
+    // Artifact card is rendered
+    expect(screen.getByRole('region', { name: /Attached Artifact/i })).toBeInTheDocument();
+    expect(screen.getByText('Superhuman PMF Survey Framework')).toBeInTheDocument();
+    expect(screen.getByText('HTML/CSS')).toBeInTheDocument();
+
+    const openBtn = screen.getByRole('button', { name: /Open artifact: Superhuman PMF Survey Framework/i });
+    expect(openBtn).toBeInTheDocument();
+
+    fireEvent.click(openBtn);
+    expect(onOpenArtifact).toHaveBeenCalledWith(mockArtifact);
+  });
 });

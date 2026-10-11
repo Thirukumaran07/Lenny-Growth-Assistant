@@ -4,7 +4,7 @@
  * All endpoints map 1:1 to the implemented FastAPI routers.
  */
 
-import type { Citation, Message, Session, ModelsStatusResponse } from '../types/chat';
+import type { Citation, Message, Session, ModelsStatusResponse, Artifact } from '../types/chat';
 
 const API_BASE = '/api';
 
@@ -23,7 +23,7 @@ export interface SessionDetailResponse {
   created_at: string;
   updated_at: string;
   messages: Message[];
-  artifacts: unknown[];
+  artifacts: Artifact[];
 }
 
 export interface CreateSessionPayload {
@@ -36,7 +36,7 @@ export interface RenameSessionPayload {
 
 // ─── Chat SSE shapes ───────────────────────────────────────────────────────
 
-export type SSEEventType = 'status' | 'citations' | 'token' | 'done' | 'error';
+export type SSEEventType = 'status' | 'citations' | 'token' | 'artifact' | 'done' | 'error';
 
 export interface SSEStatusData {
   stage: string;
@@ -51,9 +51,19 @@ export interface SSETokenData {
   token: string;
 }
 
+export interface SSEArtifactData {
+  id: string;
+  session_id: string;
+  title: string;
+  artifact_type: 'html' | 'markdown';
+  content: string;
+  created_at: string;
+}
+
 export interface SSEDoneData {
   final_content: string;
   citations?: Citation[];
+  artifact?: SSEArtifactData;
 }
 
 export interface SSEErrorData {
@@ -163,12 +173,32 @@ export const healthApi = {
   ready: () => apiRequest<ReadinessResponse>('/ready'),
 };
 
+// ─── Artifacts ────────────────────────────────────────────────────────────
+
+export const artifactsApi = {
+  get: (artifactId: string) =>
+    apiRequest<Artifact>(`/artifacts/${artifactId}`),
+
+  listForSession: (sessionId: string) =>
+    apiRequest<Artifact[]>(`/sessions/${sessionId}/artifacts`),
+
+  create: (payload: { session_id: string; title: string; artifact_type: string; content: string }) =>
+    apiRequest<Artifact>('/artifacts', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  delete: (artifactId: string) =>
+    apiRequest<void>(`/artifacts/${artifactId}`, { method: 'DELETE' }),
+};
+
 // ─── Chat SSE stream ──────────────────────────────────────────────────────
 
 export interface ChatStreamCallbacks {
   onStatus: (data: SSEStatusData) => void;
   onCitations: (data: SSECitationsData) => void;
   onToken: (data: SSETokenData) => void;
+  onArtifact?: (data: SSEArtifactData) => void;
   onDone: (data: SSEDoneData) => void;
   onError: (err: Error) => void;
 }
@@ -241,6 +271,7 @@ export function streamChat(
             if (eventType === 'status') callbacks.onStatus(data);
             else if (eventType === 'citations') callbacks.onCitations(data);
             else if (eventType === 'token') callbacks.onToken(data);
+            else if (eventType === 'artifact') callbacks.onArtifact?.(data);
             else if (eventType === 'done') callbacks.onDone(data);
             else if (eventType === 'error') throw new Error(data.error ?? 'Server error');
           } catch (parseErr) {
