@@ -3,7 +3,7 @@
 ## Date: 2026-10-11
 ## Agent: Senior Forward Deployed Engineer & AI Architect
 ## Objective:
-Execute Phase 1 requirements discovery, audit host environment, evaluate hardware constraints (Intel Core i5, 8 GB RAM), specify agent architecture, and establish formal testable acceptance criteria.
+Execute Phase 1 requirements discovery, audit host environment, evaluate hardware constraints (Intel Core i5, 8 GB RAM), specify agent architecture, and establish formal testable acceptance criteria across 10 specific functional and risk areas.
 
 ---
 
@@ -27,6 +27,9 @@ ollama list
 # Output:
 # nomic-embed-text:latest    0a109f422b47    274 MB    24 hours ago
 # llama3.2:3b                a80c4f17acd5    2.0 GB    25 hours ago
+
+which psql
+# Output: /usr/local/bin/psql
 ```
 
 ### Hardware Impact Assessment:
@@ -45,7 +48,7 @@ ollama list
   2. `Ship 30 for 30 Essay Skill`
   3. `Artifact Generator Skill`
   4. `Direct Conversation Skill`
-- **Integrity Guarantee:** We will explicitly document this decision in `design.md` and `architecture.md` without falsely claiming to use third-party proprietary agent SDKs.
+- **Integrity Guarantee:** We have explicitly documented this decision in `PRD.md` and `discovery_brief.md` without falsely claiming to use third-party proprietary agent SDKs.
 
 ### Decision 2: Storage and Vector Retrieval
 - **Resolution:** PostgreSQL 16 with the `pgvector` extension.
@@ -64,18 +67,35 @@ ollama list
 
 ---
 
-## 3. Artifacts Created in Phase 1
-- `docs/discovery_brief.md`: Problem statement, persona definition, constraints, and scope boundaries.
-- `docs/prd.md`: Formal PRD with 5 Functional Requirement clusters, 4 Non-Functional clusters, and 9 testable Acceptance Criteria.
-- `agent-transcripts/phase-1-discovery.md`: This execution log.
+## 3. Files Created in Phase 1
+1. `PRD.md`: Master Product Requirements Document covering:
+   - Primary users and JTBD (Product Manager, Growth Content Creator, Technical Evaluator).
+   - Problems and proposed solution.
+   - Measurable success metrics (citation accuracy, refusal rate, TTFT, word count, memory limits, test coverage).
+   - Assumptions and open questions.
+   - In-scope vs. out-of-scope boundaries (mandatory requirements vs. optional enhancements).
+   - 4 End-to-end user journeys (Grounded Q&A, Multi-turn Follow-up, Ship 30 for 30 essay, Sandboxed Artifact preview).
+   - Functional (FR-1 through FR-5) and Non-Functional (NFR-1 through NFR-4) requirements.
+   - Acceptance criteria for every core requirement (AC-1 through AC-10).
+   - 7 Risk categories analyzed with severity and mitigation strategies.
+   - Milestones, dependencies, and prioritized backlog.
+2. `docs/discovery_brief.md`: Detailed discovery brief with background, persona JTBD, architecture trade-offs, and hardware profiling.
+3. `docs/prd.md`: Synchronized documentation copy of `PRD.md`.
+4. `agent-transcripts/phase-1-discovery.md`: This execution log and environment audit.
 
 ---
 
 ## 4. Phase 1 Acceptance Criteria Checklist
-- [x] Host environment inspected (Python 3.12, Node v26, Docker 29, Ollama models verified).
-- [x] Hardware constraints analyzed (Intel i5, 8GB RAM profile established).
-- [x] Discovery Brief compiled in [discovery_brief.md](file:///Users/apple/Downloads/Lenny-Growth-Assistant/docs/discovery_brief.md).
-- [x] Complete, testable PRD produced in [prd.md](file:///Users/apple/Downloads/Lenny-Growth-Assistant/docs/prd.md).
-- [x] Agent layer approach justified and documented.
-- [x] No unauthorized code written before Phase 1 completion.
-- [x] Transcript record maintained without secrets.
+- [x] Primary users and their jobs to be done documented.
+- [x] Problems and proposed solution articulated.
+- [x] Measurable success metrics defined (TTFT < 2.5s, RAM < 4.5GB, 100% citation accuracy, 100% refusal rate on ungrounded queries).
+- [x] Assumptions and open questions documented.
+- [x] In-scope vs. out-of-scope features clearly delineated.
+- [x] Mandatory assignment requirements distinguished from optional enhancements.
+- [x] User journeys for grounded Q&A, follow-up questions, essay generation, and artifact creation fully specified.
+- [x] Functional (FR-1 to FR-5) and non-functional requirements (NFR-1 to NFR-4) detailed.
+- [x] Testable acceptance criteria for every core requirement specified (AC-1 to AC-10).
+- [x] 7 critical risks analyzed: hallucinations, data provenance, model latency, memory constraints, privacy, database outages, and unsafe HTML.
+- [x] Milestones, dependencies, and prioritized implementation backlog mapped.
+- [x] Zero application implementation code written (scaffold reserved for subsequent phases).
+- [x] No secrets recorded in transcripts.
