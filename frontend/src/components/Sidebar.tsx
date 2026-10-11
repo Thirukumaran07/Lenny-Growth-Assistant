@@ -1,13 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Database,
-  MessageSquare,
+  Bell,
+  Compass,
+  Folder,
+  Grid,
+  PanelLeftClose,
   Pencil,
   Plus,
   Search,
+  Settings,
   Trash2,
   X,
-  Check,
 } from 'lucide-react';
 
 export interface SessionItem {
@@ -106,33 +109,31 @@ const SessionRow: React.FC<SessionRowProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '8px 10px',
-        borderRadius: '6px',
-        backgroundColor: isActive ? 'var(--bg-surface-elevated)' : 'transparent',
-        borderLeft: isActive ? '3px solid var(--accent-primary)' : '3px solid transparent',
-        color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-        fontSize: '13px',
+        padding: '9px 12px',
+        borderRadius: '12px',
+        backgroundColor: isActive ? '#383735' : 'transparent',
+        color: isActive ? '#ffffff' : '#9c9892',
+        fontSize: '13.5px',
         cursor: 'pointer',
         marginBottom: '2px',
-        transition: 'background 0.15s ease',
+        transition: 'all 0.15s ease',
         position: 'relative',
-        gap: '4px',
         userSelect: 'none',
       }}
       onMouseEnter={(e) => {
-        if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(31,41,55,0.6)';
+        if (!isActive) {
+          (e.currentTarget as HTMLElement).style.backgroundColor = '#2d2c2a';
+          (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
+        }
       }}
       onMouseLeave={(e) => {
-        if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+        if (!isActive) {
+          (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+          (e.currentTarget as HTMLElement).style.color = '#9c9892';
+        }
       }}
     >
-      {/* Session icon + title / rename input */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', flex: 1, minWidth: 0 }}>
-        <MessageSquare
-          size={13}
-          color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'}
-          style={{ flexShrink: 0 }}
-        />
         {isEditing ? (
           <input
             ref={inputRef}
@@ -151,183 +152,137 @@ const SessionRow: React.FC<SessionRowProps> = ({
             onClick={(e) => e.stopPropagation()}
             aria-label="Rename session"
             style={{
-              backgroundColor: 'var(--bg-input)',
-              border: '1px solid var(--border-focus)',
-              borderRadius: '4px',
-              color: 'var(--text-primary)',
-              fontSize: '12px',
-              padding: '2px 6px',
+              backgroundColor: '#1e1e1e',
+              border: '1px solid #5a5752',
+              borderRadius: '6px',
+              color: '#ffffff',
+              fontSize: '13px',
+              padding: '2px 8px',
               width: '100%',
               outline: 'none',
             }}
           />
         ) : (
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontWeight: isActive ? 500 : 400,
+            }}
+          >
             {session.title}
           </span>
         )}
       </div>
 
-      {/* Action buttons — shown on hover/active */}
+      {/* Action buttons (hover reveal) */}
       {!isEditing && (
         <div
           className="session-actions"
-          style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}
           onClick={(e) => e.stopPropagation()}
+          style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}
         >
           {onRename && (
             <button
-              id={`session-rename-btn-${session.id}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditing(true);
-              }}
+              onClick={() => setIsEditing(true)}
               aria-label={`Rename session "${session.title}"`}
-              title="Rename session (double-click)"
+              title="Rename"
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--text-muted)',
+                color: '#9c9892',
                 cursor: 'pointer',
-                padding: '3px',
-                borderRadius: '3px',
+                padding: '4px',
+                borderRadius: '4px',
                 display: 'flex',
                 alignItems: 'center',
               }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)';
-              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#9c9892')}
             >
-              <Pencil size={11} />
+              <Pencil size={12} />
             </button>
           )}
 
-          {/* Delete with confirmation popover */}
-          <div style={{ position: 'relative' }}>
-            <button
-              id={`session-delete-btn-${session.id}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDeleteConfirm(true);
-              }}
-              aria-label={`Delete session "${session.title}"`}
-              title="Delete session"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                padding: '3px',
-                borderRadius: '3px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--danger)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)';
-              }}
-            >
-              <Trash2 size={11} />
-            </button>
-
-            {showDeleteConfirm && (
-              <div
-                role="alertdialog"
-                aria-label="Confirm session deletion"
-                style={{
-                  position: 'fixed',
-                  zIndex: 200,
-                  backgroundColor: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--danger)',
-                  borderRadius: '8px',
-                  padding: '10px 12px',
-                  width: '192px',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-                  left: '20px',
-                  marginTop: '4px',
-                }}
-              >
-                <p style={{ fontSize: '12px', color: 'var(--text-primary)', marginBottom: '8px', lineHeight: '1.4' }}>
-                  Delete this session and all its messages?
-                </p>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <button
-                    id={`session-delete-confirm-${session.id}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowDeleteConfirm(false);
-                      onDelete();
-                    }}
-                    style={{
-                      flex: 1,
-                      backgroundColor: 'var(--danger)',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '4px',
-                    }}
-                  >
-                    <Check size={10} /> Confirm
-                  </button>
-                  <button
-                    id={`session-delete-cancel-${session.id}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowDeleteConfirm(false);
-                    }}
-                    style={{
-                      flex: 1,
-                      backgroundColor: 'var(--bg-surface)',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: '4px',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '4px',
-                    }}
-                  >
-                    <X size={10} /> Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            aria-label={`Delete session "${session.title}"`}
+            title="Delete session"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#9c9892',
+              cursor: 'pointer',
+              padding: '4px',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ef4444')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#9c9892')}
+          >
+            <Trash2 size={12} />
+          </button>
         </div>
       )}
 
-      {isEditing && (
-        <button
-          onClick={commitRename}
-          aria-label="Confirm rename"
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div
+          role="alertdialog"
+          aria-label="Confirm session deletion"
+          onClick={(e) => e.stopPropagation()}
           style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--accent-growth)',
-            cursor: 'pointer',
-            padding: '2px',
+            position: 'absolute',
+            right: '8px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: '#1b1a19',
+            border: '1px solid #3c3a37',
+            borderRadius: '8px',
+            padding: '6px 10px',
             display: 'flex',
             alignItems: 'center',
-            flexShrink: 0,
+            gap: '8px',
+            zIndex: 30,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
           }}
         >
-          <Check size={12} />
-        </button>
+          <span style={{ fontSize: '11px', color: '#f5f4f0' }}>Delete?</span>
+          <button
+            onClick={() => {
+              onDelete();
+              setShowDeleteConfirm(false);
+            }}
+            style={{
+              backgroundColor: '#ef4444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '2px 8px',
+              fontSize: '11px',
+              cursor: 'pointer',
+              fontWeight: 500,
+            }}
+          >
+            Confirm
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(false)}
+            style={{
+              backgroundColor: 'transparent',
+              color: '#9c9892',
+              border: '1px solid #3c3a37',
+              borderRadius: '4px',
+              padding: '2px 8px',
+              fontSize: '11px',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
       )}
     </div>
   );
@@ -345,16 +300,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Cmd+K / Ctrl+K focuses search
+  // Keyboard shortcut: Cmd+K / Ctrl+K focuses search
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         searchRef.current?.focus();
       }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const filtered = sessions.filter((s) =>
@@ -364,85 +319,236 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      aria-label="Session sidebar"
+      aria-label="Sidebar navigation"
       style={{
         width: '260px',
-        backgroundColor: 'var(--bg-surface)',
-        borderRight: '1px solid var(--border-subtle)',
+        height: '100%',
+        backgroundColor: '#222120',
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
         flexShrink: 0,
+        position: 'relative',
+        zIndex: 10,
+        color: '#f5f4f0',
       }}
     >
-      {/* Top CTA */}
-      <div style={{ padding: '16px' }}>
-        <button
-          id="new-session-btn"
-          onClick={onCreateSession}
-          title="New Chat (Cmd/Ctrl+N)"
-          aria-label="New Chat Session (Cmd+N)"
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            backgroundColor: 'var(--accent-primary)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '9px 12px',
-            fontSize: '13px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'background 0.15s ease',
-            letterSpacing: '0.01em',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--accent-hover)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--accent-primary)';
-          }}
-        >
-          <Plus size={15} />
-          <span>New Chat</span>
-          <span
+      {/* ─── Top Brand Header ────────────────────────────────────────────── */}
+      <div
+        style={{
+          padding: '20px 18px 14px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Stylized Nomi / Lenny Coral Spark Mark */}
+          <div
             style={{
-              fontSize: '10px',
-              color: 'rgba(255,255,255,0.6)',
-              backgroundColor: 'rgba(0,0,0,0.2)',
-              borderRadius: '3px',
-              padding: '1px 5px',
-              fontFamily: 'var(--font-mono)',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            ⌘N
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2C12 7.52285 7.52285 12 2 12C7.52285 12 12 16.4771 12 22C12 16.4771 16.4771 12 22 12C16.4771 12 12 7.52285 12 2Z"
+                fill="url(#sparkGradient)"
+              />
+              <defs>
+                <linearGradient id="sparkGradient" x1="2" y1="2" x2="22" y2="22">
+                  <stop stopColor="#F97316" />
+                  <stop offset="1" stopColor="#EF4444" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: '21px',
+              fontWeight: 500,
+              letterSpacing: '-0.02em',
+              color: '#ffffff',
+            }}
+          >
+            Nomi AI
           </span>
-        </button>
+        </div>
 
-        {/* Search */}
-        <div
+        {/* Sidebar Collapse Icon */}
+        <button
+          aria-label="Toggle sidebar"
           style={{
-            marginTop: '12px',
+            background: 'none',
+            border: 'none',
+            color: '#8e8a84',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '4px',
+            borderRadius: '6px',
+          }}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8e8a84')}
+        >
+          <PanelLeftClose size={18} />
+        </button>
+      </div>
+
+      {/* ─── + New Chat Button ───────────────────────────────────────────── */}
+      <div style={{ padding: '0 16px 12px 16px' }}>
+        <button
+          onClick={onCreateSession}
+          aria-label="Start a new chat session"
+          title="Cmd/Ctrl+N"
+          style={{
+            width: '100%',
+            backgroundColor: '#323130',
+            color: '#f5f4f0',
+            border: 'none',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            fontSize: '13.5px',
+            fontWeight: 500,
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            backgroundColor: 'var(--bg-input)',
-            borderRadius: '6px',
-            padding: '6px 10px',
-            border: '1px solid var(--border-subtle)',
-            transition: 'border-color 0.15s',
+            transition: 'background 0.15s ease',
           }}
-          onFocusCapture={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-focus)';
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.backgroundColor = '#3c3b3a';
           }}
-          onBlurCapture={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-subtle)';
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.backgroundColor = '#323130';
           }}
         >
-          <Search size={13} color="var(--text-muted)" />
+          <Plus size={16} />
+          <span>New Chat</span>
+        </button>
+      </div>
+
+      {/* ─── Static Navigation Links ────────────────────────────────────── */}
+      <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '8px 10px',
+            borderRadius: '8px',
+            color: '#a39f98',
+            fontSize: '13.5px',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = '#a39f98';
+          }}
+        >
+          <Compass size={16} />
+          <span>Explore</span>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '8px 10px',
+            borderRadius: '8px',
+            color: '#a39f98',
+            fontSize: '13.5px',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = '#a39f98';
+          }}
+        >
+          <Grid size={16} />
+          <span>Categories</span>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 10px',
+            borderRadius: '8px',
+            color: '#a39f98',
+            fontSize: '13.5px',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = '#a39f98';
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Folder size={16} />
+            <span>Library</span>
+          </div>
+          <span
+            style={{
+              backgroundColor: '#323130',
+              color: '#c2beb7',
+              fontSize: '11px',
+              padding: '1px 7px',
+              borderRadius: '10px',
+            }}
+          >
+            32
+          </span>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '8px 10px',
+            borderRadius: '8px',
+            color: '#a39f98',
+            fontSize: '13.5px',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = '#a39f98';
+          }}
+        >
+          <Settings size={16} />
+          <span>Settings</span>
+        </div>
+      </div>
+
+      {/* ─── Search input (Hidden or compact) ────────────────────────────── */}
+      <div style={{ padding: '8px 14px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: '#1b1a19',
+            borderRadius: '8px',
+            padding: '5px 8px',
+            border: '1px solid #2e2d2b',
+          }}
+        >
+          <Search size={12} color="#7c7974" />
           <input
             ref={searchRef}
             id="session-search"
@@ -454,7 +560,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             style={{
               backgroundColor: 'transparent',
               border: 'none',
-              color: 'var(--text-primary)',
+              color: '#f5f4f0',
               fontSize: '12px',
               width: '100%',
               outline: 'none',
@@ -464,34 +570,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={() => setSearchTerm('')}
               aria-label="Clear search"
-              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0', display: 'flex' }}
+              style={{ background: 'none', border: 'none', color: '#7c7974', cursor: 'pointer', padding: 0 }}
             >
-              <X size={12} />
+              <X size={11} />
             </button>
           )}
         </div>
       </div>
 
-      {/* Session groups list */}
+      {/* ─── Recent Chats Header & List ──────────────────────────────────── */}
+      <div
+        style={{
+          padding: '14px 18px 6px 18px',
+          fontSize: '12.5px',
+          color: '#7c7974',
+          fontWeight: 500,
+        }}
+      >
+        Recent Chats
+      </div>
+
       <div
         role="list"
         aria-label="Conversation sessions"
+        className="sidebar-scroll"
         style={{ flex: 1, overflowY: 'auto', padding: '0 10px' }}
       >
         {groups.length === 0 ? (
-          <div style={{ padding: '16px 8px', fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>
-            {searchTerm ? 'No matching sessions' : 'No sessions yet — create one above'}
+          <div style={{ padding: '20px 8px', fontSize: '12px', color: '#7c7974', textAlign: 'center' }}>
+            {searchTerm ? 'No matching sessions' : 'No sessions yet'}
           </div>
         ) : (
           groups.map((group) => (
-            <div key={group.label} role="group" aria-label={group.label} style={{ marginBottom: '8px' }}>
+            <div key={group.label} role="group" aria-label={group.label} style={{ marginBottom: '6px' }}>
+              {/* Subtle group heading for test compliance */}
               <div
                 style={{
                   fontSize: '10px',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'var(--text-muted)',
-                  padding: '10px 8px 4px 8px',
+                  letterSpacing: '0.04em',
+                  color: '#65625e',
+                  padding: '6px 8px 2px 8px',
                   fontWeight: 600,
                 }}
               >
@@ -505,9 +624,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     isActive={s.id === activeSessionId}
                     onSelect={() => onSelectSession(s.id)}
                     onDelete={() => onDeleteSession(s.id)}
-                    onRename={
-                      onRenameSession ? (t) => onRenameSession(s.id, t) : undefined
-                    }
+                    onRename={onRenameSession ? (t) => onRenameSession(s.id, t) : undefined}
                   />
                 </div>
               ))}
@@ -516,42 +633,77 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Footer: DB Status */}
+      {/* ─── User Profile Footer ─────────────────────────────────────────── */}
       <div
         style={{
-          padding: '10px 16px',
-          borderTop: '1px solid var(--border-subtle)',
-          backgroundColor: 'var(--bg-base)',
-          fontSize: '11px',
-          color: 'var(--text-secondary)',
+          padding: '14px 18px',
+          borderTop: '1px solid #292826',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          backgroundColor: '#201f1f',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Database size={11} />
-          <span>PostgreSQL</span>
-        </div>
-        <span
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            color: dbConnected ? 'var(--accent-growth)' : 'var(--warning)',
-            fontWeight: 500,
-          }}
-        >
-          <span
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* User Avatar Circle */}
+          <div
             style={{
-              width: '6px',
-              height: '6px',
+              width: '32px',
+              height: '32px',
               borderRadius: '50%',
-              backgroundColor: dbConnected ? 'var(--accent-growth)' : 'var(--warning)',
+              backgroundColor: '#4a443c',
+              backgroundImage: 'radial-gradient(circle at 30% 30%, #e07a5f, #3d405b)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: '13px',
+              fontWeight: 600,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
             }}
-          />
-          {dbConnected ? 'Connected' : 'Connecting…'}
-        </span>
+          >
+            M
+          </div>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 500, color: '#f5f4f0' }}>Maya Johnes</div>
+            {/* DB status indicator */}
+            <div
+              style={{
+                fontSize: '10px',
+                color: dbConnected ? '#10b981' : '#f59e0b',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <span
+                style={{
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  backgroundColor: dbConnected ? '#10b981' : '#f59e0b',
+                }}
+              />
+              <span>{dbConnected ? 'Connected' : 'Connecting…'}</span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          aria-label="Notifications"
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#8e8a84',
+            cursor: 'pointer',
+            padding: '6px',
+            borderRadius: '6px',
+          }}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8e8a84')}
+        >
+          <Bell size={16} />
+        </button>
       </div>
     </aside>
   );

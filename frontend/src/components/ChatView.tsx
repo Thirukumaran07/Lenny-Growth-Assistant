@@ -1,22 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
-  BookOpen,
-  Compass,
-  FileText,
-  RefreshCw,
-  RotateCcw,
-  TrendingUp,
-  Users,
+  Layout,
+  Pencil,
+  Upload,
   X,
 } from 'lucide-react';
 import { Artifact, Citation, Message } from '../types/chat';
 import { ChatMessageItem } from './ChatMessageItem';
 import { ChatComposer } from './ChatComposer';
 import { CitationDrawer } from './CitationDrawer';
+import { ShowcaseCards } from './ShowcaseCards';
+import { ModelStatusBadge } from './ModelStatusBadge';
 
 interface ChatViewProps {
   activeSessionId: string | null;
+  sessionTitle?: string;
   messages: Message[];
   isStreaming: boolean;
   streamingMessage: Message | null;
@@ -27,90 +26,72 @@ interface ChatViewProps {
   onOpenArtifact?: (artifact: Artifact) => void;
   onClearError?: () => void;
   onRetry?: () => void;
-}
-
-/** Context-aware follow-up prompts derived from the last assistant message's citations. */
-function deriveFollowUps(messages: Message[]): { text: string; icon: React.ReactNode }[] {
-  const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-  if (!lastAssistant) return [];
-
-  const guests = (lastAssistant.citations ?? []).map((c) => c.guest).filter(Boolean);
-  const suggestions: { text: string; icon: React.ReactNode }[] = [];
-
-  if (guests.length > 0) {
-    const g = guests[0];
-    suggestions.push({
-      text: `What else did ${g} say about user retention?`,
-      icon: <Users size={13} color="var(--accent-primary)" />,
-    });
-    suggestions.push({
-      text: `How did ${g} define product-market fit?`,
-      icon: <Compass size={13} color="var(--accent-growth)" />,
-    });
-  }
-
-  suggestions.push(
-    {
-      text: 'What growth levers work best for early-stage SaaS?',
-      icon: <TrendingUp size={13} color="var(--warning)" />,
-    },
-    {
-      text: 'Write a Ship 30 for 30 essay on activation loops.',
-      icon: <FileText size={13} color="var(--accent-primary)" />,
-    },
-  );
-
-  return suggestions.slice(0, 4);
+  onRenameSession?: (newTitle: string) => void;
+  isViewerOpen?: boolean;
+  onToggleViewer?: () => void;
+  onProviderChanged?: (newProvider: string) => void;
 }
 
 const STARTER_PROMPTS = [
   {
-    icon: <Compass size={18} color="var(--accent-growth)" />,
     title: 'Product-Market Fit Engine',
     prompt: 'How did Superhuman measure product-market fit according to Rahul Vohra?',
-    guest: 'Rahul Vohra',
-    description: 'Discover the 40% rule and survey-based PMF measurement framework.',
+    badge: 'Rahul Vohra',
   },
   {
-    icon: <FileText size={18} color="var(--accent-primary)" />,
     title: 'Ship 30 for 30 Essay',
     prompt: 'Write a Ship 30 for 30 essay on Miro scaling product-led growth.',
-    guest: 'Elena Verna',
-    description: 'Generate an atomic essay based on transcript insights.',
+    badge: 'Elena Verna',
   },
   {
-    icon: <BookOpen size={18} color="var(--warning)" />,
     title: 'Retention Benchmarks',
-    prompt: "What retention benchmarks should a seed-stage B2B SaaS target?",
-    guest: 'Elena Verna & Gustaf Alströmer',
-    description: 'D1, D7, D30 benchmarks and cohort health signals.',
+    prompt: 'What retention benchmarks should a seed-stage B2B SaaS target?',
+    badge: 'Gustaf Alströmer',
   },
   {
-    icon: <TrendingUp size={18} color="#A78BFA" />,
-    title: 'Figma Onboarding Loop',
-    prompt: "How did Figma design their collaborative onboarding activation loop?",
-    guest: 'Amanda Kleha',
-    description: 'Activation metrics, AHA moments and onboarding frameworks.',
+    title: 'Designer Chairs Showcase',
+    prompt: 'Find 5 modern designer chairs with clean geometric shapes.',
+    badge: 'Design Selection',
   },
 ];
 
 export const ChatView: React.FC<ChatViewProps> = ({
   activeSessionId,
+  sessionTitle,
   messages,
   isStreaming,
   streamingMessage,
   error,
-  lastPrompt,
   onSendMessage,
   onStopStreaming,
   onOpenArtifact,
   onClearError,
   onRetry,
+  onRenameSession,
+  isViewerOpen,
+  onToggleViewer,
+  onProviderChanged,
 }) => {
   const [activeCitation, setActiveCitation] = useState<Citation | null>(null);
   const [citationList, setCitationList] = useState<Citation[]>([]);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleValue, setTitleValue] = useState(sessionTitle || 'Modern Chair Selection');
+  const [showShareToast, setShowShareToast] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setTitleValue(sessionTitle || 'Modern Chair Selection');
+  }, [sessionTitle]);
+
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [isEditingTitle]);
 
   // Auto-scroll on new content
   useEffect(() => {
@@ -126,8 +107,21 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   const handleCloseCitation = () => setActiveCitation(null);
 
+  const handleCommitTitle = () => {
+    const trimmed = titleValue.trim();
+    if (trimmed && onRenameSession) {
+      onRenameSession(trimmed);
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleShare = () => {
+    setShowShareToast(true);
+    navigator.clipboard?.writeText(window.location.href);
+    setTimeout(() => setShowShareToast(false), 2000);
+  };
+
   const showEmptyState = messages.length === 0 && !streamingMessage;
-  const followUps = !showEmptyState && !isStreaming ? deriveFollowUps(messages) : [];
 
   return (
     <main
@@ -139,12 +133,154 @@ export const ChatView: React.FC<ChatViewProps> = ({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        backgroundColor: 'var(--bg-base)',
+        backgroundColor: '#faf8f5',
+        borderTopLeftRadius: '28px',
+        borderBottomLeftRadius: '28px',
         position: 'relative',
         overflow: 'hidden',
+        boxShadow: '-6px 0 32px rgba(0, 0, 0, 0.18)',
       }}
     >
-      {/* Scrollable history or empty state */}
+      {/* ─── Canvas Header: Editorial Serif Title & Controls ────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '24px 38px 14px 38px',
+          flexShrink: 0,
+        }}
+      >
+        {/* Left: Editorial Serif Title + Circular Pencil Icon */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+          {isEditingTitle ? (
+            <input
+              ref={titleInputRef}
+              value={titleValue}
+              onChange={(e) => setTitleValue(e.target.value)}
+              onBlur={handleCommitTitle}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCommitTitle();
+                if (e.key === 'Escape') {
+                  setTitleValue(sessionTitle || 'Modern Chair Selection');
+                  setIsEditingTitle(false);
+                }
+              }}
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: '32px',
+                color: '#22201e',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid #22201e',
+                outline: 'none',
+                padding: '0 4px',
+              }}
+            />
+          ) : (
+            <h1
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: '34px',
+                fontWeight: 400,
+                color: '#22201e',
+                margin: 0,
+                letterSpacing: '-0.02em',
+                lineHeight: '1.15',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {sessionTitle || 'Modern Chair Selection'}
+            </h1>
+          )}
+
+          <button
+            onClick={() => setIsEditingTitle(true)}
+            title="Rename session"
+            aria-label="Rename session"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              border: '1px solid #e5dfd4',
+              backgroundColor: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#656059',
+              cursor: 'pointer',
+              flexShrink: 0,
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = '#22201e')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = '#e5dfd4')}
+          >
+            <Pencil size={13} />
+          </button>
+        </div>
+
+        {/* Right Controls: Share Pill, Model Badge, Viewer Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+          {/* Share Pill Button */}
+          <button
+            onClick={handleShare}
+            title="Share session"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #e5dfd4',
+              borderRadius: '20px',
+              padding: '7px 16px',
+              fontSize: '13px',
+              fontWeight: 500,
+              color: '#34322f',
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = '#22201e')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = '#e5dfd4')}
+          >
+            <Upload size={13} />
+            <span>{showShareToast ? 'Link Copied!' : 'Share'}</span>
+          </button>
+
+          {/* Model Status & Switcher Badge */}
+          <ModelStatusBadge onProviderChanged={onProviderChanged} />
+
+          {/* Side-by-Side Artifact Viewer Toggle */}
+          {onToggleViewer && (
+            <button
+              onClick={onToggleViewer}
+              title="Toggle Side-by-Side Artifact Viewer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: isViewerOpen ? '#262423' : '#ffffff',
+                color: isViewerOpen ? '#ffffff' : '#34322f',
+                border: '1px solid #e5dfd4',
+                borderRadius: '20px',
+                padding: '7px 14px',
+                fontSize: '13px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Layout size={13} />
+              <span>{isViewerOpen ? 'Hide' : 'Artifacts'}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ─── Scrollable Message Canvas ──────────────────────────────────── */}
       <div
         role="region"
         aria-label="Chat conversation history"
@@ -152,143 +288,167 @@ export const ChatView: React.FC<ChatViewProps> = ({
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '28px 32px',
+          padding: '10px 42px 24px 42px',
           display: 'flex',
           flexDirection: 'column',
         }}
       >
-        {showEmptyState ? (
-          /* ── Empty / Welcome State ── */
+        {/* Error banner if present */}
+        {error && (
           <div
+            role="alert"
             style={{
-              maxWidth: '760px',
-              width: '100%',
-              margin: 'auto',
-              textAlign: 'center',
-              padding: '20px 0 40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: '#fee2e2',
+              border: '1px solid #fecaca',
+              borderRadius: '14px',
+              padding: '12px 18px',
+              color: '#991b1b',
+              marginBottom: '18px',
+              fontSize: '13.5px',
             }}
           >
-            {/* Badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertTriangle size={16} />
+              <span>{error}</span>
+            </div>
+            {onClearError && (
+              <button
+                onClick={onClearError}
+                aria-label="Dismiss error"
+                style={{ background: 'none', border: 'none', color: '#991b1b', cursor: 'pointer', padding: 0 }}
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {showEmptyState ? (
+          /* ─── Welcome / Empty State Showcase (Matching Screenshot) ────── */
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            {/* Sample User Turn Pill */}
             <div
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                borderRadius: '20px',
-                padding: '5px 16px',
-                fontSize: '12px',
-                color: 'var(--accent-growth)',
-                marginBottom: '20px',
-                fontWeight: 500,
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginBottom: '18px',
               }}
             >
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: 'var(--accent-growth)', flexShrink: 0 }} />
-              Grounded in Lenny's Podcast & Newsletter Archives
+              <div
+                style={{
+                  maxWidth: '78%',
+                  backgroundColor: '#f1ede6',
+                  color: '#2b2927',
+                  padding: '12px 22px',
+                  borderRadius: '22px',
+                  fontSize: '15px',
+                  lineHeight: '1.55',
+                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)',
+                  border: '1px solid #e7e2d7',
+                }}
+              >
+                Find 5 modern designer chairs with clean geometric shapes.
+              </div>
             </div>
 
-            <h1
-              style={{
-                fontSize: '28px',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                marginBottom: '12px',
-                letterSpacing: '-0.025em',
-                lineHeight: '1.25',
-              }}
-            >
-              How can I help with your<br />product and growth goals?
-            </h1>
+            {/* Sample Assistant Intro Paragraph */}
             <p
               style={{
-                fontSize: '15px',
-                color: 'var(--text-secondary)',
-                lineHeight: '1.6',
-                maxWidth: '560px',
-                margin: '0 auto 40px auto',
+                fontSize: '15.5px',
+                color: '#2d2b28',
+                lineHeight: '1.7',
+                marginBottom: '8px',
               }}
             >
-              Ask tactical questions grounded in verified podcast transcripts, generate a{' '}
-              <em>Ship 30 for 30</em> essay, or explore retention benchmarks with source attribution.
+              If you're looking for chairs with clean geometry, sculptural silhouettes, and a contemporary
+              designer aesthetic, I'd focus on pieces that use simple forms in a visually striking way
+              rather than ornate details.
             </p>
 
-            {/* Starter cards grid */}
+            {/* ─── 4 Showcase Cards Carousel (Exact Screenshot Match) ──── */}
+            <ShowcaseCards />
+
+            {/* Summary Bullet Points with Bold Leads */}
+            <div style={{ fontSize: '15px', color: '#2d2b28', lineHeight: '1.75', marginTop: '6px' }}>
+              <p style={{ marginBottom: '8px' }}>
+                Each of these chairs represents a different interpretation of modern geometric design:
+              </p>
+              <ul style={{ paddingLeft: '22px', margin: '0 0 16px 0' }}>
+                <li style={{ marginBottom: '6px' }}>
+                  <strong>GENESÖN</strong> — soft curves, sculptural look, great as an accent piece.
+                </li>
+                <li style={{ marginBottom: '6px' }}>
+                  <strong>Arper Catifa 46</strong> — lightweight, ergonomic, the most versatile option.
+                </li>
+                <li style={{ marginBottom: '6px' }}>
+                  <strong>Panton Chair</strong> — iconic, bold, perfect for a statement corner.
+                </li>
+                <li style={{ marginBottom: '6px' }}>
+                  <strong>Infiniti Canova Wood</strong> — warm materials, minimal Scandinavian feel.
+                </li>
+              </ul>
+            </div>
+
+            {/* Quick Prompts Pills for One-Click Search */}
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-                gap: '14px',
-                textAlign: 'left',
+                display: 'flex',
+                gap: '8px',
+                flexWrap: 'wrap',
+                marginTop: '16px',
+                paddingTop: '16px',
+                borderTop: '1px solid #ede7dc',
               }}
             >
-              {STARTER_PROMPTS.map((card, idx) => (
+              {STARTER_PROMPTS.map((item, i) => (
                 <button
-                  key={idx}
-                  id={`starter-prompt-${idx}`}
-                  onClick={() => !isStreaming && onSendMessage(card.prompt)}
-                  disabled={isStreaming}
-                  aria-label={`Starter prompt: ${card.title}`}
+                  key={i}
+                  onClick={() => onSendMessage(item.prompt)}
                   style={{
-                    backgroundColor: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: '12px',
-                    padding: '18px',
-                    cursor: isStreaming ? 'not-allowed' : 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e3ddd2',
+                    borderRadius: '18px',
+                    padding: '6px 14px',
+                    fontSize: '12.5px',
+                    color: '#3d3935',
+                    cursor: 'pointer',
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    opacity: isStreaming ? 0.5 : 1,
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)',
+                    transition: 'all 0.15s ease',
                   }}
                   onMouseEnter={(e) => {
-                    if (!isStreaming) {
-                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent-primary)';
-                      (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-                      (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(59,130,246,0.15)';
-                    }
+                    (e.currentTarget as HTMLElement).style.borderColor = '#22201e';
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f8f5ee';
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-subtle)';
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                    (e.currentTarget as HTMLElement).style.borderColor = '#e3ddd2';
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {card.icon}
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {card.title}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
-                    {card.description}
-                  </p>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>
-                    Source: {card.guest}
-                  </div>
+                  <span style={{ fontWeight: 600 }}>{item.title}</span>
+                  <span style={{ color: '#8e8a84', fontSize: '11px' }}>({item.badge})</span>
                 </button>
               ))}
             </div>
           </div>
         ) : (
-          /* ── Message Stream ── */
-          <div style={{ maxWidth: '840px', width: '100%', margin: '0 auto' }}>
-            {messages.map((msg) => (
+          /* ─── Active Message Turns ──────────────────────────────────── */
+          <div>
+            {messages.map((m) => (
               <ChatMessageItem
-                key={msg.id}
-                message={msg}
+                key={m.id}
+                message={m}
                 onOpenCitation={handleOpenCitation}
                 onOpenArtifact={onOpenArtifact}
-                onRetry={
-                  msg.role === 'assistant' && msg.statusStage === 'error' && onRetry
-                    ? onRetry
-                    : undefined
-                }
+                onRetry={onRetry}
               />
             ))}
 
-            {/* Live streaming message */}
             {streamingMessage && (
               <ChatMessageItem
                 message={streamingMessage}
@@ -296,188 +456,36 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 onOpenArtifact={onOpenArtifact}
               />
             )}
-
-            {/* Session-specific follow-up suggestions */}
-            {followUps.length > 0 && (
-              <div
-                aria-label="Follow-up question suggestions"
-                style={{
-                  marginTop: '4px',
-                  marginBottom: '16px',
-                  padding: '14px 16px',
-                  backgroundColor: 'var(--bg-surface)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '10px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '10px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    color: 'var(--text-muted)',
-                    marginBottom: '10px',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                >
-                  <RotateCcw size={10} />
-                  Suggested follow-ups
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {followUps.map((f, i) => (
-                    <button
-                      key={i}
-                      id={`followup-${i}`}
-                      onClick={() => onSendMessage(f.text)}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        backgroundColor: 'var(--bg-surface-elevated)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: '16px',
-                        padding: '5px 12px',
-                        fontSize: '12px',
-                        color: 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s',
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent-primary)';
-                        (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-subtle)';
-                        (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
-                      }}
-                    >
-                      {f.icon}
-                      <span>{f.text}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
           </div>
         )}
+
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Global Error Banner */}
-      {error && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          style={{
-            maxWidth: '800px',
-            width: 'calc(100% - 64px)',
-            margin: '0 auto 12px auto',
-            backgroundColor: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.5)',
-            borderRadius: '10px',
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            color: '#FCA5A5',
-            fontSize: '13px',
-            gap: '10px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: 1 }}>
-            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div style={{ flex: 1 }}>
-              <strong style={{ display: 'block', marginBottom: '4px' }}>Connection Error</strong>
-              <span style={{ fontSize: '12px', lineHeight: '1.5', color: '#FCA5A5' }}>{error}</span>
-              {error.toLowerCase().includes('ollama') && (
-                <div
-                  style={{
-                    marginTop: '8px',
-                    fontSize: '12px',
-                    color: 'var(--text-secondary)',
-                    fontFamily: 'var(--font-mono)',
-                    backgroundColor: 'rgba(0,0,0,0.3)',
-                    borderRadius: '4px',
-                    padding: '4px 8px',
-                  }}
-                >
-                  → Run: <code>ollama serve</code> in Terminal, then retry
-                </div>
-              )}
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '8px', flexShrink: 0, alignItems: 'flex-start' }}>
-            {onRetry && lastPrompt && (
-              <button
-                id="error-retry-btn"
-                onClick={onRetry}
-                aria-label="Retry last request"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  backgroundColor: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '5px',
-                  padding: '5px 10px',
-                  fontSize: '11px',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <RefreshCw size={11} /> Retry
-              </button>
-            )}
-            {onClearError && (
-              <button
-                onClick={onClearError}
-                aria-label="Dismiss error"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-muted)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '2px',
-                }}
-              >
-                <X size={15} />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Composer */}
+      {/* ─── Bottom Floating Composer ───────────────────────────────────── */}
       <div
         style={{
-          padding: '10px 32px 20px 32px',
-          backgroundColor: 'var(--bg-base)',
-          borderTop: '1px solid var(--border-subtle)',
+          padding: '0 38px 24px 38px',
+          flexShrink: 0,
         }}
       >
         <ChatComposer
           onSendMessage={onSendMessage}
           onStopStreaming={onStopStreaming}
           isStreaming={isStreaming}
-          disabled={false}
           activeSessionId={activeSessionId}
         />
       </div>
 
-      {/* Citation Drawer slide-over */}
-      <CitationDrawer
-        citation={activeCitation}
-        allCitations={citationList}
-        onSelectCitation={(c) => setActiveCitation(c)}
-        onClose={handleCloseCitation}
-      />
+      {/* ─── Citation Detail Drawer Modal ───────────────────────────────── */}
+      {activeCitation && (
+        <CitationDrawer
+          citation={activeCitation}
+          allCitations={citationList}
+          onClose={handleCloseCitation}
+          onSelectCitation={(c) => setActiveCitation(c)}
+        />
+      )}
     </main>
   );
 };

@@ -1,20 +1,48 @@
-/* ── Design Tokens ───────────────────────────────────────────── */
+/* ── Design Tokens (Editorial Luxury & Dark Glass Theme) ───────── */
 :root {
-  --bg-base: #0B0F17;
-  --bg-surface: #111827;
-  --bg-surface-elevated: #1F2937;
-  --bg-input: #161F30;
-  --border-subtle: #1F293D;
-  --border-focus: #3B82F6;
-  --text-primary: #F9FAFB;
-  --text-secondary: #9CA3AF;
-  --text-muted: #6B7280;
-  --accent-primary: #3B82F6;
-  --accent-hover: #2563EB;
-  --accent-growth: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Frame & Sidebar Colors */
+  --bg-frame: #1e1e1e;
+  --bg-sidebar: #222120;
+  --bg-sidebar-hover: #2d2c2a;
+  --bg-sidebar-active: #383735;
+  --border-sidebar: #2c2b29;
+  --text-sidebar: #f5f4f0;
+  --text-sidebar-muted: #8e8a84;
+
+  /* Canvas (Main Area) Warm Luxury Ivory */
+  --bg-canvas: #faf8f5;
+  --bg-canvas-card: #ffffff;
+  --bg-canvas-subtle: #f3efe8;
+  --bg-canvas-hover: #eae4da;
+  --border-canvas: #eae4da;
+  --border-canvas-strong: #ded7cb;
+  
+  /* Text on Canvas */
+  --text-canvas-title: #22201e;
+  --text-canvas-primary: #2d2b28;
+  --text-canvas-secondary: #635f59;
+  --text-canvas-muted: #918c84;
+
+  /* Composer & Pill Colors */
+  --bg-composer: #f1ede5;
+  --border-composer: #e3ddd2;
+  --bg-pill: #e8e3d9;
+  --bg-pill-hover: #ded7cb;
+
+  /* Accents */
+  --accent-coral: #e05d44;
+  --accent-warm: #d97706;
+  --accent-olive: #65a30d;
+  --accent-primary: #22201e;
+  --accent-dark-btn: #262423;
+  --accent-dark-btn-hover: #363432;
+  --accent-growth: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* Typography */
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
@@ -27,12 +55,13 @@
 
 html, body, #root {
   height: 100%;
+  width: 100%;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-base);
-  color: var(--text-primary);
+  background-color: var(--bg-frame);
+  color: var(--text-sidebar);
   height: 100vh;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
@@ -48,11 +77,18 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
-  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Focus rings (WCAG AA) ───────────────────────────────────── */
@@ -61,7 +97,7 @@ input:focus-visible,
 textarea:focus-visible,
 a:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid var(--border-focus);
+  outline: 2px solid #22201e;
   outline-offset: 2px;
 }
 
@@ -71,71 +107,97 @@ button, input, textarea, select {
 }
 
 a {
-  color: var(--accent-primary);
+  color: inherit;
   text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
 }
 
 /* ── Animations ──────────────────────────────────────────────── */
-@keyframes pulseGlow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.animate-pulse-glow {
-  animation: pulseGlow 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.25s ease-out;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Markdown content typography ─────────────────────────────── */
+.animate-slide-in {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 1.4s ease-in-out infinite;
+}
+
+/* ── Editorial Serif Headings ────────────────────────────────── */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* ── Markdown Content Typography (Ivory Canvas) ─────────────── */
+.markdown-content {
+  color: var(--text-canvas-primary);
+  font-size: 15px;
+  line-height: 1.75;
+}
 .markdown-content p {
-  margin-bottom: 10px;
-  line-height: 1.7;
+  margin-bottom: 12px;
 }
 .markdown-content p:last-child {
   margin-bottom: 0;
 }
 .markdown-content strong {
-  color: var(--text-primary);
+  color: var(--text-canvas-title);
   font-weight: 600;
 }
 .markdown-content em {
-  color: var(--text-secondary);
+  color: var(--text-canvas-secondary);
   font-style: italic;
+}
+.markdown-content ul, .markdown-content ol {
+  margin: 10px 0 14px 20px;
+}
+.markdown-content li {
+  margin-bottom: 6px;
+  line-height: 1.65;
 }
 .markdown-content hr {
   border: none;
-  border-top: 1px solid var(--border-subtle);
-  margin: 16px 0;
+  border-top: 1px solid var(--border-canvas);
+  margin: 20px 0;
+}
+
+/* Code in Markdown */
+.markdown-content code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background-color: var(--bg-canvas-subtle);
+  color: #8b321a;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.markdown-content pre {
+  background-color: #242220;
+  color: #f5f4f0;
+  padding: 14px;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 14px 0;
+}
+.markdown-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
 }
 
 /* ── Session row hover reveals action buttons ─────────────────── */
@@ -148,22 +210,11 @@ a:hover {
   opacity: 1;
 }
 
-/* ── Shimmer skeleton ────────────────────────────────────────── */
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--bg-surface-elevated) 25%,
-    rgba(255, 255, 255, 0.04) 50%,
-    var(--bg-surface-elevated) 75%
-  );
-  background-size: 400px 100%;
-  animation: shimmer 1.5s infinite linear;
+/* ── Showcase Card Hover Effects ─────────────────────────────── */
+.showcase-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-/* ── Responsive layout ───────────────────────────────────────── */
-@media (max-width: 768px) {
-  /* On mobile, sidebar collapses */
-  aside {
-    display: none;
-  }
+.showcase-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }

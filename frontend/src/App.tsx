@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Header } from './components/Header';
 import { Sidebar, SessionItem } from './components/Sidebar';
 import { ChatView } from './components/ChatView';
 import { ArtifactViewer } from './components/ArtifactViewer';
@@ -15,9 +14,9 @@ export const App: React.FC = () => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [activeArtifact, setActiveArtifact] = useState<Artifact | null>(null);
   const [sessionArtifacts, setSessionArtifacts] = useState<Artifact[]>([]);
-  const [systemReady, setSystemReady] = useState<boolean | null>(null);
+  const [, setSystemReady] = useState<boolean | null>(null);
   const [dbConnected, setDbConnected] = useState(false);
-  const [activeProvider, setActiveProvider] = useState('local_ollama');
+  const [, setActiveProvider] = useState('local_ollama');
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -362,18 +361,52 @@ export const App: React.FC = () => {
 
   // ─── Render ─────────────────────────────────────────────────────────────
 
+  const currentSession = sessions.find((s) => s.id === activeSessionId);
+  const sessionTitle =
+    currentSession?.title || (activeSessionId ? 'Growth Session' : 'Modern Chair Selection');
+
   return (
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
         height: '100vh',
         width: '100vw',
         overflow: 'hidden',
-        backgroundColor: 'var(--bg-base)',
+        backgroundColor: '#222120',
+        padding: '0',
       }}
     >
-      <Header
+      <Sidebar
+        dbConnected={dbConnected}
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onSelectSession={handleSelectSession}
+        onCreateSession={handleCreateSession}
+        onDeleteSession={handleDeleteSession}
+        onRenameSession={handleRenameSession}
+      />
+
+      <ChatView
+        activeSessionId={activeSessionId}
+        sessionTitle={sessionTitle}
+        messages={messages}
+        isStreaming={isStreaming}
+        streamingMessage={streamingMessage}
+        error={error}
+        lastPrompt={lastPrompt}
+        onSendMessage={handleSendMessage}
+        onStopStreaming={handleStopStreaming}
+        onOpenArtifact={(art) => {
+          setActiveArtifact(art);
+          setIsViewerOpen(true);
+        }}
+        onClearError={() => setError(null)}
+        onRetry={handleRetry}
+        onRenameSession={(newTitle) => {
+          if (activeSessionId) {
+            handleRenameSession(activeSessionId, newTitle);
+          }
+        }}
         isViewerOpen={isViewerOpen}
         onToggleViewer={() => {
           setIsViewerOpen((prev) => {
@@ -384,52 +417,14 @@ export const App: React.FC = () => {
             return next;
           });
         }}
-        systemReady={systemReady}
-        activeProvider={activeProvider}
         onProviderChanged={(p) => setActiveProvider(p)}
       />
 
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
-        <Sidebar
-          dbConnected={dbConnected}
-          sessions={sessions}
-          activeSessionId={activeSessionId}
-          onSelectSession={handleSelectSession}
-          onCreateSession={handleCreateSession}
-          onDeleteSession={handleDeleteSession}
-          onRenameSession={handleRenameSession}
-        />
-
-        <ChatView
-          activeSessionId={activeSessionId}
-          messages={messages}
-          isStreaming={isStreaming}
-          streamingMessage={streamingMessage}
-          error={error}
-          lastPrompt={lastPrompt}
-          onSendMessage={handleSendMessage}
-          onStopStreaming={handleStopStreaming}
-          onOpenArtifact={(art) => {
-            setActiveArtifact(art);
-            setIsViewerOpen(true);
-          }}
-          onClearError={() => setError(null)}
-          onRetry={handleRetry}
-        />
-
-        <ArtifactViewer
-          artifact={activeArtifact}
-          isOpen={isViewerOpen}
-          onClose={() => setIsViewerOpen(false)}
-        />
-      </div>
+      <ArtifactViewer
+        artifact={activeArtifact}
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+      />
     </div>
   );
 };
