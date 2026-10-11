@@ -9,6 +9,7 @@ import structlog
 
 from backend.app.config import get_settings
 from backend.app.routers.health import router as health_router
+from backend.app.routers.sessions import router as sessions_router
 
 logger = structlog.get_logger()
 
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
 
     # Register Routers
     app.include_router(health_router, prefix="/api")
+    app.include_router(sessions_router, prefix="/api")
     # Also expose /health and /ready directly at root for standard Docker/K8s orchestrators
     app.include_router(health_router)
 

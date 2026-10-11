@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Header } from './components/Header';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar, SessionItem } from './components/Sidebar';
 import { ChatEmptyState } from './components/ChatEmptyState';
 import { ArtifactViewerSkeleton } from './components/ArtifactViewerSkeleton';
 
@@ -19,6 +19,54 @@ export const App: React.FC = () => {
   const [systemReady, setSystemReady] = useState<boolean | null>(null);
   const [dbConnected, setDbConnected] = useState<boolean>(false);
   const [activeProvider, setActiveProvider] = useState<string>('local_ollama');
+  const [sessions, setSessions] = useState<SessionItem[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+
+  const loadSessions = async () => {
+    try {
+      const res = await fetch('/api/sessions?limit=50');
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data.items || []);
+        if (data.items?.length > 0 && !activeSessionId) {
+          setActiveSessionId(data.items[0].id);
+        }
+      }
+    } catch {
+      // Ignore initial connection errors
+    }
+  };
+
+  const handleCreateSession = async () => {
+    try {
+      const res = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'New Growth Session' }),
+      });
+      if (res.ok) {
+        const newSession = await res.json();
+        setSessions((prev) => [newSession, ...prev]);
+        setActiveSessionId(newSession.id);
+      }
+    } catch (err) {
+      console.error('Failed to create session:', err);
+    }
+  };
+
+  const handleDeleteSession = async (id: string) => {
+    try {
+      const res = await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setSessions((prev) => prev.filter((s) => s.id !== id));
+        if (activeSessionId === id) {
+          setActiveSessionId(null);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to delete session:', err);
+    }
+  };
 
   useEffect(() => {
     // Poll readiness probe
@@ -28,8 +76,12 @@ export const App: React.FC = () => {
         if (res.ok) {
           const data: ReadinessResponse = await res.json();
           setSystemReady(data.status === 'ready');
-          setDbConnected(Boolean(data.dependencies.database?.healthy));
+          const isDbOk = Boolean(data.dependencies.database?.healthy);
+          setDbConnected(isDbOk);
           setActiveProvider(data.active_provider || 'local_ollama');
+          if (isDbOk) {
+            loadSessions();
+          }
         } else {
           setSystemReady(false);
         }
@@ -72,7 +124,14 @@ export const App: React.FC = () => {
         }}
       >
         {/* Left Sidebar */}
-        <Sidebar dbConnected={dbConnected} />
+        <Sidebar
+          dbConnected={dbConnected}
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          onSelectSession={(id) => setActiveSessionId(id)}
+          onCreateSession={handleCreateSession}
+          onDeleteSession={handleDeleteSession}
+        />
 
         {/* Center Chat View */}
         <ChatEmptyState />

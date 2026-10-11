@@ -1,11 +1,37 @@
-import React from 'react';
-import { Database, MessageSquare, Plus, Search } from 'lucide-react';
+import React, { useState } from 'react';
+import { Database, MessageSquare, Plus, Search, Trash2 } from 'lucide-react';
+
+export interface SessionItem {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  message_count: number;
+}
 
 interface SidebarProps {
   dbConnected: boolean;
+  sessions: SessionItem[];
+  activeSessionId: string | null;
+  onSelectSession: (id: string) => void;
+  onCreateSession: () => void;
+  onDeleteSession: (id: string) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ dbConnected }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  dbConnected,
+  sessions,
+  activeSessionId,
+  onSelectSession,
+  onCreateSession,
+  onDeleteSession,
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filtered = sessions.filter((s) =>
+    s.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <aside
       style={{
@@ -21,6 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ dbConnected }) => {
       {/* Top CTA */}
       <div style={{ padding: '16px' }}>
         <button
+          onClick={onCreateSession}
           style={{
             width: '100%',
             display: 'flex',
@@ -35,6 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ dbConnected }) => {
             fontSize: '13px',
             fontWeight: 500,
             cursor: 'pointer',
+            transition: 'background 0.15s ease',
           }}
         >
           <Plus size={16} />
@@ -58,7 +86,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ dbConnected }) => {
           <input
             type="text"
             placeholder="Search sessions..."
-            disabled
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               backgroundColor: 'transparent',
               border: 'none',
@@ -71,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ dbConnected }) => {
         </div>
       </div>
 
-      {/* Sessions list skeleton */}
+      {/* Sessions list */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px' }}>
         <div
           style={{
@@ -82,28 +111,63 @@ export const Sidebar: React.FC<SidebarProps> = ({ dbConnected }) => {
             padding: '8px 4px',
           }}
         >
-          Recent Sessions
+          Recent Sessions ({filtered.length})
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 10px',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-surface-elevated)',
-            borderLeft: '3px solid var(--accent-primary)',
-            color: 'var(--text-primary)',
-            fontSize: '13px',
-            cursor: 'pointer',
-          }}
-        >
-          <MessageSquare size={14} color="var(--accent-primary)" />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            Getting Started
-          </span>
-        </div>
+        {filtered.length === 0 ? (
+          <div style={{ padding: '12px 8px', fontSize: '12px', color: 'var(--text-muted)' }}>
+            No sessions found
+          </div>
+        ) : (
+          filtered.map((s) => {
+            const isActive = s.id === activeSessionId;
+            return (
+              <div
+                key={s.id}
+                onClick={() => onSelectSession(s.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 10px',
+                  borderRadius: '6px',
+                  backgroundColor: isActive ? 'var(--bg-surface-elevated)' : 'transparent',
+                  borderLeft: isActive ? '3px solid var(--accent-primary)' : '3px solid transparent',
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  marginBottom: '4px',
+                  transition: 'background 0.15s ease',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                  <MessageSquare size={14} color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'} />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {s.title}
+                  </span>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteSession(s.id);
+                  }}
+                  title="Delete Session"
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    padding: '2px',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* Footer Status */}
