@@ -1,18 +1,20 @@
 import React from 'react';
-import { Cpu, Layout, Server, Sparkles } from 'lucide-react';
+import { Layout, Server, Sparkles } from 'lucide-react';
+import { ModelStatusBadge } from './ModelStatusBadge';
 
 interface HeaderProps {
   isViewerOpen: boolean;
   onToggleViewer: () => void;
   systemReady: boolean | null;
-  activeProvider: string;
+  activeProvider?: string;
+  onProviderChanged?: (newProvider: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   isViewerOpen,
   onToggleViewer,
   systemReady,
-  activeProvider,
+  onProviderChanged,
 }) => {
   return (
     <header
@@ -65,26 +67,8 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Center / Right controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        {/* Model Indicator */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontSize: '12px',
-            padding: '5px 10px',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-surface-elevated)',
-            border: '1px solid var(--border-subtle)',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          <Cpu size={14} color="var(--accent-growth)" />
-          <span>Model:</span>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
-            {activeProvider === 'local_ollama' ? 'Ollama (llama3.2:3b)' : 'Cloud Provider'}
-          </span>
-        </div>
+        {/* Model Indicator & Switcher */}
+        <ModelStatusBadge onProviderChanged={onProviderChanged} />
 
         {/* System Health Badge */}
         <div

@@ -1,3 +1,4 @@
+/* ── Design Tokens ───────────────────────────────────────────── */
 :root {
   --bg-base: #0B0F17;
   --bg-surface: #111827;
@@ -13,14 +14,19 @@
   --accent-growth: #10B981;
   --warning: #F59E0B;
   --danger: #EF4444;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-* {
+/* ── Reset ───────────────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
 }
 
 body {
@@ -30,43 +36,134 @@ body {
   height: 100vh;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbars */
+/* ── Scrollbars ──────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--border-subtle);
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
 
-/* Base button and input resets */
-button, input, textarea {
-  font-family: inherit;
-}
-
-button:focus-visible, input:focus-visible, textarea:focus-visible {
+/* ── Focus rings (WCAG AA) ───────────────────────────────────── */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
 
-/* Animations */
+/* ── Base resets ─────────────────────────────────────────────── */
+button, input, textarea, select {
+  font-family: inherit;
+}
+
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ── Animations ──────────────────────────────────────────────── */
 @keyframes pulseGlow {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
 }
 
 .animate-pulse-glow {
-  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulseGlow 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* ── Markdown content typography ─────────────────────────────── */
+.markdown-content p {
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+.markdown-content strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.markdown-content em {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 16px 0;
+}
+
+/* ── Session row hover reveals action buttons ─────────────────── */
+.session-actions {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+[role="button"]:hover .session-actions,
+[role="button"]:focus-within .session-actions {
+  opacity: 1;
+}
+
+/* ── Shimmer skeleton ────────────────────────────────────────── */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-elevated) 25%,
+    rgba(255, 255, 255, 0.04) 50%,
+    var(--bg-surface-elevated) 75%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* ── Responsive layout ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* On mobile, sidebar collapses */
+  aside {
+    display: none;
+  }
 }
