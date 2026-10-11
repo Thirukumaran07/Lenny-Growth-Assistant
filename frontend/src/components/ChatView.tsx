@@ -10,7 +10,6 @@ import { Artifact, Citation, Message } from '../types/chat';
 import { ChatMessageItem } from './ChatMessageItem';
 import { ChatComposer } from './ChatComposer';
 import { CitationDrawer } from './CitationDrawer';
-import { ShowcaseCards } from './ShowcaseCards';
 import { ModelStatusBadge } from './ModelStatusBadge';
 
 interface ChatViewProps {
@@ -49,9 +48,9 @@ const STARTER_PROMPTS = [
     badge: 'Gustaf Alströmer',
   },
   {
-    title: 'Designer Chairs Showcase',
-    prompt: 'Find 5 modern designer chairs with clean geometric shapes.',
-    badge: 'Design Selection',
+    title: 'B2B Growth Loops',
+    prompt: 'How do product-led growth and sales-led growth loops combine effectively according to Elena Verna?',
+    badge: 'Elena Verna',
   },
 ];
 
@@ -162,7 +161,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCommitTitle();
                 if (e.key === 'Escape') {
-                  setTitleValue(sessionTitle || 'Modern Chair Selection');
+                  setTitleValue(sessionTitle || 'Growth Strategy Session');
                   setIsEditingTitle(false);
                 }
               }}
@@ -192,7 +191,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 textOverflow: 'ellipsis',
               }}
             >
-              {sessionTitle || 'Modern Chair Selection'}
+              {sessionTitle || 'Growth Strategy Session'}
             </h1>
           )}
 
@@ -327,80 +326,71 @@ export const ChatView: React.FC<ChatViewProps> = ({
         )}
 
         {showEmptyState ? (
-          /* ─── Welcome / Empty State Showcase (Matching Screenshot) ────── */
-          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            {/* Sample User Turn Pill */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                marginBottom: '18px',
-              }}
-            >
-              <div
+          /* ─── Editorial Welcome / Strategic Starter Prompts ─────────── */
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%',
+              maxWidth: '820px',
+              margin: 'auto',
+              padding: '24px 0',
+            }}
+          >
+            {/* Header Badge */}
+            <div style={{ marginBottom: '14px' }}>
+              <span
                 style={{
-                  maxWidth: '78%',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
                   backgroundColor: '#f1ede6',
-                  color: '#2b2927',
-                  padding: '12px 22px',
-                  borderRadius: '22px',
-                  fontSize: '15px',
-                  lineHeight: '1.55',
-                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)',
-                  border: '1px solid #e7e2d7',
+                  color: '#6e6962',
+                  border: '1px solid #e2ddd4',
+                  borderRadius: '16px',
+                  padding: '4px 12px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  letterSpacing: '0.02em',
                 }}
               >
-                Find 5 modern designer chairs with clean geometric shapes.
-              </div>
+                Lenny's Growth Knowledge Base
+              </span>
             </div>
 
-            {/* Sample Assistant Intro Paragraph */}
+            {/* Editorial Serif Greeting */}
+            <h2
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: '36px',
+                fontWeight: 400,
+                color: '#22201e',
+                lineHeight: '1.25',
+                margin: '0 0 12px 0',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              What growth challenge are you working on?
+            </h2>
+
             <p
               style={{
                 fontSize: '15.5px',
-                color: '#2d2b28',
-                lineHeight: '1.7',
-                marginBottom: '8px',
+                color: '#68645e',
+                lineHeight: '1.65',
+                margin: '0 0 32px 0',
+                maxWidth: '640px',
               }}
             >
-              If you're looking for chairs with clean geometry, sculptural silhouettes, and a contemporary
-              designer aesthetic, I'd focus on pieces that use simple forms in a visually striking way
-              rather than ornate details.
+              Ask strategic questions on product-market fit, growth loops, and retention benchmarks grounded in 200+ podcast transcripts with verified citations.
             </p>
 
-            {/* ─── 4 Showcase Cards Carousel (Exact Screenshot Match) ──── */}
-            <ShowcaseCards />
-
-            {/* Summary Bullet Points with Bold Leads */}
-            <div style={{ fontSize: '15px', color: '#2d2b28', lineHeight: '1.75', marginTop: '6px' }}>
-              <p style={{ marginBottom: '8px' }}>
-                Each of these chairs represents a different interpretation of modern geometric design:
-              </p>
-              <ul style={{ paddingLeft: '22px', margin: '0 0 16px 0' }}>
-                <li style={{ marginBottom: '6px' }}>
-                  <strong>GENESÖN</strong> — soft curves, sculptural look, great as an accent piece.
-                </li>
-                <li style={{ marginBottom: '6px' }}>
-                  <strong>Arper Catifa 46</strong> — lightweight, ergonomic, the most versatile option.
-                </li>
-                <li style={{ marginBottom: '6px' }}>
-                  <strong>Panton Chair</strong> — iconic, bold, perfect for a statement corner.
-                </li>
-                <li style={{ marginBottom: '6px' }}>
-                  <strong>Infiniti Canova Wood</strong> — warm materials, minimal Scandinavian feel.
-                </li>
-              </ul>
-            </div>
-
-            {/* Quick Prompts Pills for One-Click Search */}
+            {/* Clean Grid of Starter Cards */}
             <div
               style={{
-                display: 'flex',
-                gap: '8px',
-                flexWrap: 'wrap',
-                marginTop: '16px',
-                paddingTop: '16px',
-                borderTop: '1px solid #ede7dc',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                gap: '14px',
               }}
             >
               {STARTER_PROMPTS.map((item, i) => (
@@ -409,29 +399,70 @@ export const ChatView: React.FC<ChatViewProps> = ({
                   onClick={() => onSendMessage(item.prompt)}
                   style={{
                     backgroundColor: '#ffffff',
-                    border: '1px solid #e3ddd2',
+                    border: '1px solid #e7e2d7',
                     borderRadius: '18px',
-                    padding: '6px 14px',
-                    fontSize: '12.5px',
-                    color: '#3d3935',
+                    padding: '18px 20px',
+                    textAlign: 'left',
                     cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
+                    transition: 'all 0.18s ease',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)',
-                    transition: 'all 0.15s ease',
+                    flexDirection: 'column',
+                    gap: '8px',
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.borderColor = '#22201e';
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f8f5ee';
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      '0 6px 20px rgba(0, 0, 0, 0.05)';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = '#e3ddd2';
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                    (e.currentTarget as HTMLElement).style.borderColor = '#e7e2d7';
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      '0 2px 8px rgba(0, 0, 0, 0.02)';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
                   }}
                 >
-                  <span style={{ fontWeight: 600 }}>{item.title}</span>
-                  <span style={{ color: '#8e8a84', fontSize: '11px' }}>({item.badge})</span>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '14.5px',
+                        fontWeight: 600,
+                        color: '#22201e',
+                      }}
+                    >
+                      {item.title}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        color: '#b45309',
+                        backgroundColor: '#fef3c7',
+                        padding: '2px 8px',
+                        borderRadius: '10px',
+                      }}
+                    >
+                      {item.badge}
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: '13px',
+                      color: '#716d66',
+                      lineHeight: '1.5',
+                      margin: 0,
+                    }}
+                  >
+                    {item.prompt}
+                  </p>
                 </button>
               ))}
             </div>

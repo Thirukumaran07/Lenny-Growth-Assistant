@@ -1,14 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Bell,
-  Compass,
-  Folder,
-  Grid,
-  PanelLeftClose,
   Pencil,
   Plus,
   Search,
-  Settings,
   Trash2,
   X,
 } from 'lucide-react';
@@ -342,7 +336,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Stylized Nomi / Lenny Coral Spark Mark */}
+          {/* Lenny Coral Spark Mark */}
           <div
             style={{
               width: '28px',
@@ -374,32 +368,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
               color: '#ffffff',
             }}
           >
-            Nomi AI
+            Lenny AI
           </span>
         </div>
-
-        {/* Sidebar Collapse Icon */}
-        <button
-          aria-label="Toggle sidebar"
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#8e8a84',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '4px',
-            borderRadius: '6px',
-          }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8e8a84')}
-        >
-          <PanelLeftClose size={18} />
-        </button>
       </div>
 
       {/* ─── + New Chat Button ───────────────────────────────────────────── */}
-      <div style={{ padding: '0 16px 12px 16px' }}>
+      <div style={{ padding: '0 16px 10px 16px' }}>
         <button
           onClick={onCreateSession}
           aria-label="Start a new chat session"
@@ -431,124 +406,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      {/* ─── Static Navigation Links ────────────────────────────────────── */}
-      <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '8px 10px',
-            borderRadius: '8px',
-            color: '#a39f98',
-            fontSize: '13.5px',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#a39f98';
-          }}
-        >
-          <Compass size={16} />
-          <span>Explore</span>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '8px 10px',
-            borderRadius: '8px',
-            color: '#a39f98',
-            fontSize: '13.5px',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#a39f98';
-          }}
-        >
-          <Grid size={16} />
-          <span>Categories</span>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '8px 10px',
-            borderRadius: '8px',
-            color: '#a39f98',
-            fontSize: '13.5px',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#a39f98';
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Folder size={16} />
-            <span>Library</span>
-          </div>
-          <span
-            style={{
-              backgroundColor: '#323130',
-              color: '#c2beb7',
-              fontSize: '11px',
-              padding: '1px 7px',
-              borderRadius: '10px',
-            }}
-          >
-            32
-          </span>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '8px 10px',
-            borderRadius: '8px',
-            color: '#a39f98',
-            fontSize: '13.5px',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#f5f4f0';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#a39f98';
-          }}
-        >
-          <Settings size={16} />
-          <span>Settings</span>
-        </div>
-      </div>
-
-      {/* ─── Search input (Hidden or compact) ────────────────────────────── */}
-      <div style={{ padding: '8px 14px' }}>
+      {/* ─── Search input ────────────────────────────────────────────────── */}
+      <div style={{ padding: '0 16px 12px 16px' }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             backgroundColor: '#1b1a19',
-            borderRadius: '8px',
-            padding: '5px 8px',
+            borderRadius: '10px',
+            padding: '7px 10px',
             border: '1px solid #2e2d2b',
           }}
         >
-          <Search size={12} color="#7c7974" />
+          <Search size={13} color="#7c7974" />
           <input
             ref={searchRef}
             id="session-search"
@@ -572,7 +443,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               aria-label="Clear search"
               style={{ background: 'none', border: 'none', color: '#7c7974', cursor: 'pointer', padding: 0 }}
             >
-              <X size={11} />
+              <X size={12} />
             </button>
           )}
         </div>
@@ -581,10 +452,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* ─── Recent Chats Header & List ──────────────────────────────────── */}
       <div
         style={{
-          padding: '14px 18px 6px 18px',
-          fontSize: '12.5px',
+          padding: '8px 18px 6px 18px',
+          fontSize: '12px',
           color: '#7c7974',
-          fontWeight: 500,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
         }}
       >
         Recent Chats
@@ -597,13 +470,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         style={{ flex: 1, overflowY: 'auto', padding: '0 10px' }}
       >
         {groups.length === 0 ? (
-          <div style={{ padding: '20px 8px', fontSize: '12px', color: '#7c7974', textAlign: 'center' }}>
+          <div style={{ padding: '24px 8px', fontSize: '12.5px', color: '#7c7974', textAlign: 'center' }}>
             {searchTerm ? 'No matching sessions' : 'No sessions yet'}
           </div>
         ) : (
           groups.map((group) => (
             <div key={group.label} role="group" aria-label={group.label} style={{ marginBottom: '6px' }}>
-              {/* Subtle group heading for test compliance */}
               <div
                 style={{
                   fontSize: '10px',
@@ -633,10 +505,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* ─── User Profile Footer ─────────────────────────────────────────── */}
+      {/* ─── Database & System Status Footer ───────────────────────────── */}
       <div
         style={{
-          padding: '14px 18px',
+          padding: '12px 18px',
           borderTop: '1px solid #292826',
           display: 'flex',
           alignItems: 'center',
@@ -644,66 +516,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           backgroundColor: '#201f1f',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* User Avatar Circle */}
-          <div
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span
             style={{
-              width: '32px',
-              height: '32px',
+              width: '7px',
+              height: '7px',
               borderRadius: '50%',
-              backgroundColor: '#4a443c',
-              backgroundImage: 'radial-gradient(circle at 30% 30%, #e07a5f, #3d405b)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontSize: '13px',
-              fontWeight: 600,
-              boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+              backgroundColor: dbConnected ? '#10b981' : '#f59e0b',
+              boxShadow: dbConnected
+                ? '0 0 8px rgba(16, 185, 129, 0.4)'
+                : '0 0 8px rgba(245, 158, 11, 0.4)',
             }}
-          >
-            M
-          </div>
-          <div>
-            <div style={{ fontSize: '13px', fontWeight: 500, color: '#f5f4f0' }}>Maya Johnes</div>
-            {/* DB status indicator */}
-            <div
-              style={{
-                fontSize: '10px',
-                color: dbConnected ? '#10b981' : '#f59e0b',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              <span
-                style={{
-                  width: '5px',
-                  height: '5px',
-                  borderRadius: '50%',
-                  backgroundColor: dbConnected ? '#10b981' : '#f59e0b',
-                }}
-              />
-              <span>{dbConnected ? 'Connected' : 'Connecting…'}</span>
-            </div>
-          </div>
+          />
+          <span style={{ fontSize: '12px', fontWeight: 500, color: '#d4cfc7' }}>
+            {dbConnected ? 'Connected' : 'Connecting…'}
+          </span>
         </div>
-
-        <button
-          aria-label="Notifications"
+        <span
           style={{
-            background: 'none',
-            border: 'none',
-            color: '#8e8a84',
-            cursor: 'pointer',
-            padding: '6px',
-            borderRadius: '6px',
+            fontSize: '11px',
+            color: '#7c7974',
+            fontFamily: 'var(--font-mono)',
           }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8e8a84')}
         >
-          <Bell size={16} />
-        </button>
+          PostgreSQL
+        </span>
       </div>
     </aside>
   );

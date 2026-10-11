@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowUp,
-  Code,
-  Globe,
-  Lightbulb,
-  Plus,
   Radio,
   Square,
 } from 'lucide-react';
@@ -69,11 +65,6 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const canSubmit =
     prompt.trim().length > 0 && !isStreaming && !disabled && !isOverLimit;
 
-  const insertPrefix = (prefix: string) => {
-    setPrompt((prev) => (prev ? `${prev} ${prefix}` : prefix));
-    textareaRef.current?.focus();
-  };
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -110,7 +101,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="Ask me anything....."
+          placeholder="Ask Lenny anything about growth, PMF, retention, PLG…"
           aria-label="Chat query input"
           disabled={disabled}
           style={{
@@ -138,109 +129,19 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             paddingTop: '2px',
           }}
         >
-          {/* Action Pills */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={() => insertPrefix('/essay ')}
-              title="Brainstorm an atomic essay"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                backgroundColor: '#e6e1d7',
-                border: 'none',
-                borderRadius: '16px',
-                padding: '5px 11px',
-                fontSize: '12px',
-                color: '#383531',
-                cursor: 'pointer',
-                fontWeight: 500,
-                transition: 'background 0.15s ease',
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#dad4c9')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#e6e1d7')}
-            >
-              <Lightbulb size={13} color="#d97706" />
-              <span>Brainstorm</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => insertPrefix('What do transcripts say about ')}
-              title="Query podcast archives"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                backgroundColor: '#e6e1d7',
-                border: 'none',
-                borderRadius: '16px',
-                padding: '5px 11px',
-                fontSize: '12px',
-                color: '#383531',
-                cursor: 'pointer',
-                fontWeight: 500,
-                transition: 'background 0.15s ease',
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#dad4c9')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#e6e1d7')}
-            >
-              <Globe size={13} color="#e05d44" />
-              <span>Web search</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => insertPrefix('/artifact ')}
-              title="Generate interactive artifact"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                backgroundColor: '#e6e1d7',
-                border: 'none',
-                borderRadius: '16px',
-                padding: '5px 11px',
-                fontSize: '12px',
-                color: '#383531',
-                cursor: 'pointer',
-                fontWeight: 500,
-                transition: 'background 0.15s ease',
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#dad4c9')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#e6e1d7')}
-            >
-              <Code size={13} color="#e05d44" />
-              <span>Code</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => insertPrefix('How did ')}
-              title="More actions"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#e6e1d7',
-                border: 'none',
-                borderRadius: '50%',
-                width: '26px',
-                height: '26px',
-                color: '#4a4641',
-                cursor: 'pointer',
-                transition: 'background 0.15s ease',
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#dad4c9')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#e6e1d7')}
-            >
-              <Plus size={13} />
-            </button>
-
-            {isOverLimit && (
-              <span style={{ fontSize: '11px', color: '#ef4444', marginLeft: '4px' }}>
+          {/* Helper hint or character counter */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minHeight: '20px' }}>
+            {isOverLimit ? (
+              <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 500 }}>
+                {prompt.length}/{MAX_CHAR_COUNT} characters (exceeds limit)
+              </span>
+            ) : prompt.length > 3000 ? (
+              <span style={{ fontSize: '11px', color: '#d97706' }}>
                 {prompt.length}/{MAX_CHAR_COUNT}
+              </span>
+            ) : (
+              <span style={{ fontSize: '11.5px', color: '#9c978f' }}>
+                Return to send · Shift+Return for new line
               </span>
             )}
           </div>
@@ -251,9 +152,10 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               type="button"
               onClick={onStopStreaming}
               aria-label="Stop generating response"
+              title="Stop generating"
               style={{
-                width: '38px',
-                height: '38px',
+                width: '36px',
+                height: '36px',
                 borderRadius: '50%',
                 backgroundColor: '#262423',
                 color: '#ffffff',
@@ -267,16 +169,17 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#383534')}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#262423')}
             >
-              <Square size={14} fill="#ffffff" />
+              <Square size={13} fill="#ffffff" />
             </button>
           ) : (
             <button
               type="submit"
               disabled={!canSubmit}
               aria-label="Send message"
+              title={canSubmit ? 'Send message' : 'Type a question'}
               style={{
-                width: '38px',
-                height: '38px',
+                width: '36px',
+                height: '36px',
                 borderRadius: '50%',
                 backgroundColor: canSubmit ? '#262423' : '#d2cbbf',
                 color: canSubmit ? '#ffffff' : '#8a8479',
@@ -295,9 +198,9 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               }}
             >
               {prompt.trim() ? (
-                <ArrowUp size={18} strokeWidth={2.4} />
+                <ArrowUp size={17} strokeWidth={2.4} />
               ) : (
-                <Radio size={18} />
+                <Radio size={16} />
               )}
             </button>
           )}

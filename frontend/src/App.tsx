@@ -363,7 +363,7 @@ export const App: React.FC = () => {
 
   const currentSession = sessions.find((s) => s.id === activeSessionId);
   const sessionTitle =
-    currentSession?.title || (activeSessionId ? 'Growth Session' : 'Modern Chair Selection');
+    currentSession?.title || (activeSessionId ? 'Growth Session' : 'Growth Strategy Session');
 
   return (
     <div

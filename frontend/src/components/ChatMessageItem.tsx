@@ -14,7 +14,6 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Artifact, Citation, Message } from '../types/chat';
-import { ShowcaseCards } from './ShowcaseCards';
 
 interface ChatMessageItemProps {
   message: Message;
@@ -328,14 +327,6 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           />
         )}
       </div>
-
-      {/* ─── 4 Showcase Cards (Matching Screenshot) ────────────────────── */}
-      {(hasCitations || (!isUser && message.content.length > 50)) && (
-        <ShowcaseCards
-          citations={message.citations}
-          onOpenCitation={onOpenCitation}
-        />
-      )}
 
       {/* Attached Standalone Artifact Card */}
       {message.artifact && (
