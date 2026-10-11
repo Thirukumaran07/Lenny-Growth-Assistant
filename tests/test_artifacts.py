@@ -279,6 +279,8 @@ async def test_artifact_endpoints_lifecycle(async_client):
 # ─── 5. Artifact Generator Skill Streaming Test ──────────────────────────────
 
 @pytest.mark.asyncio
+@pytest.mark.requires_postgres
+@pytest.mark.requires_ollama
 async def test_artifact_generator_skill_streaming():
     """Verify that ArtifactGeneratorSkill synthesizes and persists artifact record."""
     settings = get_settings()

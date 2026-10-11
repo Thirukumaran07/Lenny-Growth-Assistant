@@ -36,6 +36,8 @@ def test_skill_router_classification():
 
 
 @pytest.mark.asyncio
+@pytest.mark.requires_postgres
+@pytest.mark.requires_ollama
 async def test_grounded_qa_turn_and_citations():
     """Verify agent executes Grounded Q&A skill, attaches citations, and persists turns."""
     settings = get_settings()
@@ -93,6 +95,8 @@ async def test_grounded_qa_turn_and_citations():
 
 
 @pytest.mark.asyncio
+@pytest.mark.requires_postgres
+@pytest.mark.requires_ollama
 async def test_followup_context_continuity():
     """Verify that follow-up questions leverage prior turn context for continuity."""
     settings = get_settings()
@@ -137,6 +141,8 @@ async def test_followup_context_continuity():
 
 
 @pytest.mark.asyncio
+@pytest.mark.requires_postgres
+@pytest.mark.requires_ollama
 async def test_ship30_essay_generation_structure():
     """Verify Ship 30 for 30 skill produces structured atomic essay with hook and pillars."""
     settings = get_settings()
@@ -176,6 +182,8 @@ async def test_ship30_essay_generation_structure():
 
 
 @pytest.mark.asyncio
+@pytest.mark.requires_postgres
+@pytest.mark.requires_ollama
 async def test_insufficient_evidence_flow():
     """Verify asking ungrounded queries returns an explicit refusal without fabricating facts."""
     settings = get_settings()
@@ -213,6 +221,8 @@ async def test_insufficient_evidence_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.requires_postgres
+@pytest.mark.requires_ollama
 async def test_chat_stream_api_endpoint(async_client: AsyncClient):
     """Verify POST /api/chat/stream returns valid Server-Sent Events."""
     # Create session

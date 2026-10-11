@@ -21,6 +21,7 @@ from backend.app.providers.cloud_openai import OpenAICloudProvider
 
 
 @pytest.mark.asyncio
+@pytest.mark.requires_ollama
 async def test_ollama_provider_health_check():
     """Verify OllamaProvider checks daemon reachability and models."""
     provider = OllamaProvider()
@@ -31,6 +32,7 @@ async def test_ollama_provider_health_check():
 
 
 @pytest.mark.asyncio
+@pytest.mark.requires_ollama
 async def test_ollama_live_inference():
     """Verify live inference using local llama3.2:3b generates valid non-empty tokens."""
     provider = OllamaProvider()
@@ -98,7 +100,11 @@ async def test_models_api_endpoints(async_client: AsyncClient):
     assert data["hardware_profile"]["ram_total_gb"] == 8
     assert data["providers"]["local_ollama"]["is_healthy"] is True
 
-    # Test inference endpoint with local model
+
+@pytest.mark.asyncio
+@pytest.mark.requires_ollama
+async def test_models_live_test_inference_endpoint(async_client: AsyncClient):
+    """Verify POST /api/models/test-inference with live local Ollama model."""
     test_res = await async_client.post(
         "/api/models/test-inference",
         json={"prompt": "Say test"},
