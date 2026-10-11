@@ -63,22 +63,34 @@ export const ModelStatusBadge: React.FC<ModelStatusBadgeProps> = ({ onProviderCh
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          fontSize: '12px',
-          padding: '5px 10px',
-          borderRadius: '6px',
-          backgroundColor: 'var(--bg-surface-elevated)',
-          border: '1px solid var(--border-subtle)',
-          color: 'var(--text-secondary)',
+          fontSize: '13px',
+          padding: '7px 14px',
+          borderRadius: '20px',
+          backgroundColor: 'rgba(255, 255, 255, 0.45)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid #e5dfd4',
+          color: '#34322f',
           cursor: 'pointer',
+          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)',
+          transition: 'all 0.15s ease',
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+          (e.currentTarget as HTMLElement).style.borderColor = '#22201e';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255, 255, 255, 0.45)';
+          (e.currentTarget as HTMLElement).style.borderColor = '#e5dfd4';
         }}
       >
         {isLocal ? (
-          <Cpu size={14} color="var(--accent-growth)" />
+          <Cpu size={14} color="#10b981" />
         ) : (
-          <Cloud size={14} color="var(--accent-primary)" />
+          <Cloud size={14} color="#22201e" />
         )}
-        <span>Model:</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+        <span style={{ color: '#68645e' }}>Model:</span>
+        <span style={{ color: '#22201e', fontWeight: 600 }}>
           {isLocal ? 'Ollama (llama3.2:3b)' : 'Cloud OpenAI'}
         </span>
         <span
@@ -86,10 +98,11 @@ export const ModelStatusBadge: React.FC<ModelStatusBadgeProps> = ({ onProviderCh
             width: '7px',
             height: '7px',
             borderRadius: '50%',
-            backgroundColor: ollamaHealthy ? 'var(--accent-growth)' : 'var(--danger)',
+            backgroundColor: ollamaHealthy ? '#10b981' : '#ef4444',
+            boxShadow: ollamaHealthy ? '0 0 6px rgba(16, 185, 129, 0.4)' : undefined,
           }}
         />
-        <ChevronDown size={12} color="var(--text-muted)" />
+        <ChevronDown size={12} color="#8a857e" />
       </button>
 
       {/* Popover */}
@@ -102,10 +115,10 @@ export const ModelStatusBadge: React.FC<ModelStatusBadgeProps> = ({ onProviderCh
             top: 'calc(100% + 8px)',
             right: 0,
             width: '320px',
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: '10px',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e5dfd4',
+            borderRadius: '12px',
+            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.08)',
             zIndex: 100,
             padding: '16px',
             display: 'flex',
@@ -114,12 +127,12 @@ export const ModelStatusBadge: React.FC<ModelStatusBadgeProps> = ({ onProviderCh
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#22201e' }}>
               LLM Provider Architecture
             </span>
             <button
               onClick={() => setIsOpen(false)}
-              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', color: '#8a857e', cursor: 'pointer' }}
             >
               <X size={14} />
             </button>

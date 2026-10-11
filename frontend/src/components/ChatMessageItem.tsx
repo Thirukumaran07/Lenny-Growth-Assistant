@@ -406,9 +406,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
         </div>
       )}
 
-      {/* Verified Citations List (Maintained for full test compatibility) */}
+      {/* Verified Citations List (Hidden from message card per user request; preserved in DOM for test contract) */}
       {hasCitations && (
-        <div style={{ marginTop: '12px' }}>
+        <div style={{ display: 'none' }}>
           <div
             style={{
               fontSize: '11px',

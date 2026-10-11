@@ -6,6 +6,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import logoImg from './image.png';
 
 export interface SessionItem {
   id: string;
@@ -336,29 +337,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Lenny Coral Spark Mark */}
-          <div
+          <img
+            src={logoImg}
+            alt="Lenny AI Logo"
             style={{
               width: '28px',
               height: '28px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              borderRadius: '50%',
+              objectFit: 'contain',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.25)',
+              flexShrink: 0,
             }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2C12 7.52285 7.52285 12 2 12C7.52285 12 12 16.4771 12 22C12 16.4771 16.4771 12 22 12C16.4771 12 12 7.52285 12 2Z"
-                fill="url(#sparkGradient)"
-              />
-              <defs>
-                <linearGradient id="sparkGradient" x1="2" y1="2" x2="22" y2="22">
-                  <stop stopColor="#F97316" />
-                  <stop offset="1" stopColor="#EF4444" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+          />
           <span
             style={{
               fontFamily: 'var(--font-serif)',
