@@ -1,0 +1,33 @@
+{
+  "title": "The Ultimate Guide to Product-Led Growth and Retention",
+  "guest": "Elena Verna",
+  "episode_date": "2023-01-26",
+  "source_url": "https://www.lennyspodcast.com/the-ultimate-guide-to-product-led-growth-elena-verna/",
+  "segments": [
+    {
+      "speaker": "Lenny Rachitsky",
+      "timestamp": "02:15",
+      "text": "Elena, you have advised companies like Miro, Amplitude, and SurveyMonkey on PLG. How do you distinguish between good retention and great retention in B2B SaaS versus B2C?"
+    },
+    {
+      "speaker": "Elena Verna",
+      "timestamp": "02:40",
+      "text": "Retention is the heartbeat of growth. If your product does not retain, you do not have a growth engine—you have a leaky bucket. In consumer apps, Day 30 user retention typically benchmarks around 20% to 25% for top-tier products. But in B2B SaaS, you must evaluate retention on two levels: user-level retention and account-level net dollar retention (NDR)."
+    },
+    {
+      "speaker": "Elena Verna",
+      "timestamp": "05:18",
+      "text": "For product-led B2B SaaS, great monthly user retention is around 40% to 60% after month three. At the account level, best-in-class PLG companies target net dollar retention above 120% or even 130%. If your NDR is below 100%, you are shrinking year over year before you even factor in new customer acquisition."
+    },
+    {
+      "speaker": "Elena Verna",
+      "timestamp": "09:30",
+      "text": "At Miro, the growth flywheel worked because of collaborative activation. When a single user created a whiteboard, they immediately invited three colleagues to brainstorm. That meant Miro's acquisition loop was embedded directly inside the core product experience. The product itself was the primary sales rep and onboarding agent."
+    },
+    {
+      "speaker": "Elena Verna",
+      "timestamp": "14:10",
+      "text": "The common trap product teams make is treating freemium as a pricing tier. Freemium is not a pricing strategy; it is an acquisition model. The free tier must provide immediate standalone utility, but retain high-leverage collaborative features or administrative governance for the enterprise paid tier."
+    }
+  ]
+}

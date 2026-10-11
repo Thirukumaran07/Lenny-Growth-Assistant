@@ -1,0 +1,33 @@
+{
+  "title": "How Superhuman Built an Engine to Find Product-Market Fit",
+  "guest": "Rahul Vohra",
+  "episode_date": "2022-08-15",
+  "source_url": "https://www.lennyspodcast.com/how-superhuman-built-an-engine-to-find-product-market-fit-rahul-vohra/",
+  "segments": [
+    {
+      "speaker": "Lenny Rachitsky",
+      "timestamp": "04:12",
+      "text": "Rahul, welcome to the podcast. Many founders struggle with knowing whether they actually have product-market fit. You came up with a quantitative framework at Superhuman. How did you define and measure PMF?"
+    },
+    {
+      "speaker": "Rahul Vohra",
+      "timestamp": "04:35",
+      "text": "When we were building Superhuman in 2017, the prevailing wisdom was Marc Andreessen's definition: you know you have it when the product is flying off the shelves and servers are melting. But that is a lagging indicator. It tells you when you have it, not how to get there. I found Sean Ellis's survey approach: ask your users 'How would you feel if you could no longer use Superhuman?' with three options: very disappointed, somewhat disappointed, and not disappointed."
+    },
+    {
+      "speaker": "Rahul Vohra",
+      "timestamp": "06:10",
+      "text": "Sean Ellis benchmarked hundreds of startups and found that the magic threshold is 40%. Companies that struggled to grow almost always had under 40% of users saying they would be 'very disappointed'. Companies with strong traction almost always exceeded 40%. When we first ran this survey on Superhuman in summer 2017, our score was only 22%. We were nowhere near product-market fit."
+    },
+    {
+      "speaker": "Rahul Vohra",
+      "timestamp": "08:45",
+      "text": "To systematically increase our score from 22% to 58%, we built the Product-Market Fit Engine. First, segment to find your High-Expectation Customer (HXC). Second, analyze feedback to convert on-the-fence users while doubling down on what the very disappointed group loved. Third, divide your product roadmap 50/50: allocate 50% of engineering bandwidth to doubling down on loved features, and 50% to resolving objections of the somewhat disappointed group."
+    },
+    {
+      "speaker": "Rahul Vohra",
+      "timestamp": "12:20",
+      "text": "The key insight about the 'somewhat disappointed' group is you must ignore users who want completely different products. Only pay attention to users whose main objection is a speed bump or missing core integration. If someone wanted Superhuman to be an ERP or project management tool, we politely ignored that feedback to avoid diluting our focus."
+    }
+  ]
+}

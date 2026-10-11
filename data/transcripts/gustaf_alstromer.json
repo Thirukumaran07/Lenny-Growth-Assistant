@@ -1,0 +1,28 @@
+{
+  "title": "How to Find Product-Market Fit, Measure Retention, and Accelerate Growth",
+  "guest": "Gustaf Alströmer",
+  "episode_date": "2023-05-11",
+  "source_url": "https://www.lennyspodcast.com/how-to-find-product-market-fit-gustaf-alstromer-y-combinator/",
+  "segments": [
+    {
+      "speaker": "Lenny Rachitsky",
+      "timestamp": "03:45",
+      "text": "Gustaf, you have seen thousands of companies go through Y Combinator and previously led growth at Airbnb. What does a real product-market fit retention curve look like?"
+    },
+    {
+      "speaker": "Gustaf Alströmer",
+      "timestamp": "04:10",
+      "text": "The classic test of product-market fit is whether your cohort retention curve flattens out parallel to the x-axis. If your curve continuously slopes downward toward zero over months, you do not have PMF, regardless of how fast top-of-funnel signups are growing. You cannot pour marketing budget on a product that churns everyone out."
+    },
+    {
+      "speaker": "Gustaf Alströmer",
+      "timestamp": "07:30",
+      "text": "At Airbnb, we discovered that the single biggest lever for growth was host activation in the first 14 days. If a new host received their first booking inquiry within two weeks, their likelihood of remaining an active host for the next 12 months increased by more than 300%. Growth teams should obsess over the initial time-to-value milestone."
+    },
+    {
+      "speaker": "Gustaf Alströmer",
+      "timestamp": "11:50",
+      "text": "When founders ask what good retention is at YC, we say: for consumer subscription apps, 30% retention at month 12 is top tier. For B2B software, 80% logo retention at year one is baseline, and top quartile is 90% plus with expanding net revenue retention."
+    }
+  ]
+}
