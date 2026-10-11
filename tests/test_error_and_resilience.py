@@ -188,3 +188,48 @@ async def test_database_operational_error_handled_gracefully():
         assert response.status_code == 500
         data = response.json()
         assert data["error"] == "InternalServerError"
+
+
+@pytest.mark.asyncio
+async def test_request_correlation_id_middleware(async_client: AsyncClient):
+    """Verify CorrelationIdMiddleware generates or propagates request and session IDs."""
+    # 1. Without client request ID - must generate one
+    res1 = await async_client.get("/api/health")
+    assert res1.status_code == 200
+    assert "x-request-id" in res1.headers
+    assert len(res1.headers["x-request-id"]) > 0
+
+    # 2. With client-provided request ID - must propagate exactly
+    custom_req_id = "custom-uuid-test-999"
+    custom_sess_id = "session-correlation-123"
+    res2 = await async_client.get(
+        "/api/health",
+        headers={
+            "X-Request-ID": custom_req_id,
+            "X-Session-ID": custom_sess_id,
+        },
+    )
+    assert res2.status_code == 200
+    assert res2.headers["x-request-id"] == custom_req_id
+    assert res2.headers["x-session-id"] == custom_sess_id
+
+
+def test_logging_censors_sensitive_keys():
+    """Verify structured logger censor processor scrubs secrets and masks prompt texts."""
+    from backend.app.logging_config import censor_sensitive_keys
+
+    prompt_text = "What did Lenny say about PMF benchmarks for Superhuman?"
+    event_dict = {
+        "event": "test_event",
+        "openai_api_key": "sk-proj-supersecret12345",
+        "authorization": "Bearer secret_jwt_token",
+        "user_prompt": prompt_text,
+        "safe_param": "operational",
+    }
+
+    sanitized = censor_sensitive_keys(None, "info", event_dict)
+    assert sanitized["openai_api_key"] == "[REDACTED_SECRET]"
+    assert sanitized["authorization"] == "[REDACTED_SECRET]"
+    assert sanitized["safe_param"] == "operational"
+    assert "What did Lenny say" not in sanitized["user_prompt"]
+    assert sanitized["user_prompt_char_count"] == len(prompt_text)

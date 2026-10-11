@@ -1,0 +1,112 @@
+version: "3.8"
+
+services:
+  # ─── 1. PostgreSQL with pgvector extension ──────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: lenny_postgres
+    environment:
+      POSTGRES_DB: lenny_growth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lenny_growth"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - lenny_network
+
+  # ─── 2. Backend FastAPI Application ─────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: lenny_backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      FRONTEND_ORIGIN: http://localhost:5173
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/lenny_growth
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_GENERATION_MODEL: llama3.2:3b
+      OLLAMA_EMBEDDING_MODEL: nomic-embed-text
+      OLLAMA_TIMEOUT_SECONDS: 90.0
+      ACTIVE_LLM_PROVIDER: local_ollama
+      CLOUD_PROVIDER_TYPE: ${CLOUD_PROVIDER_TYPE:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      # Allows backend container to communicate with host-native Ollama daemon on macOS/Linux
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - lenny_network
+
+  # ─── 3. Frontend React/Vite Application ──────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lenny_frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5173/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - lenny_network
+
+  # ─── 4. Transcript Ingestion Tool (Run on-demand) ───────────────────────────
+  ingest:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: lenny_ingest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/lenny_growth
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["python", "-m", "backend.app.rag.cli_ingest"]
+    profiles:
+      - tools
+    networks:
+      - lenny_network
+
+volumes:
+  pg_data:
+    name: lenny_pg_data
+
+networks:
+  lenny_network:
+    name: lenny_growth_network
+    driver: bridge

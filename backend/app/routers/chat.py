@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+import structlog
 
 from backend.app.agent.runner import AgentRunner
 from backend.app.db.session import get_db
@@ -26,6 +27,7 @@ async def stream_chat_turn(
     db: AsyncSession = Depends(get_db),
 ):
     """Initiates an SSE stream returning real-time status, citation metadata, and token chunks."""
+    structlog.contextvars.bind_contextvars(session_id=str(payload.session_id))
 
     async def event_generator():
         try:

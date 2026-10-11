@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 import structlog
 
 from backend.app.config import get_settings
+from backend.app.logging_config import setup_logging, CorrelationIdMiddleware
 from backend.app.routers.health import router as health_router
 from backend.app.routers.sessions import router as sessions_router
 from backend.app.routers.models import router as models_router
@@ -21,6 +22,7 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application startup and shutdown lifecycle management."""
     settings = get_settings()
+    setup_logging(is_production=(settings.APP_ENV == "production"))
     logger.info(
         "app_startup",
         name=settings.APP_NAME,
@@ -35,6 +37,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 def create_app() -> FastAPI:
     """Build and configure the FastAPI application instance."""
     settings = get_settings()
+    setup_logging(is_production=(settings.APP_ENV == "production"))
 
     app = FastAPI(
         title=settings.APP_NAME,
@@ -42,6 +45,9 @@ def create_app() -> FastAPI:
         description="Local-first conversational AI workbench grounded in Lenny's Podcast archives.",
         lifespan=lifespan,
     )
+
+    # Request and Session Correlation ID Middleware
+    app.add_middleware(CorrelationIdMiddleware)
 
     # Cross-Origin Resource Sharing (CORS)
     app.add_middleware(
